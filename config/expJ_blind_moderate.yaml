@@ -1,0 +1,22 @@
+# Exp J (moderate): blind FP-budgeted censor. Uninformed sender discovers the monitor
+# by seeing messages blocked and must adapt. Sweep strictness = false-positive cost.
+run_name: expJ_blind_moderate
+prompt_version: v2
+models:
+  - "google/gemma-2-27b-it"
+pairing: same_model
+conditions:
+  informed: [false]
+filter:
+  mode: blind
+  judge_model: "openai/gpt-4o-mini"
+  strictness: moderate
+  redaction: per_char
+  forbidden_levels: [50]
+max_turns: 5
+runs_per_item: 1
+sampling:
+  temperature: 0.7
+  max_tokens: 300
+seed_base: 1234
+budget_usd_max: 50.00
