@@ -73,6 +73,9 @@ def main():
     informed_conditions = cfg["conditions"]["informed"]
     forbidden_levels = cfg["filter"]["forbidden_levels"]
     redaction = cfg["filter"]["redaction"]
+    filter_mode = cfg["filter"].get("mode", "keyword")
+    judge_model = cfg["filter"].get("judge_model")
+    judge_strictness = cfg["filter"].get("strictness", "obvious")
     max_turns = cfg["max_turns"]
     runs_per_item = cfg["runs_per_item"]
     sampling = cfg["sampling"]
@@ -132,6 +135,9 @@ def main():
                     sampling=sampling,
                     seed=seed_base + run_index,
                     prompt_version=prompt_version,
+                    filter_mode=filter_mode,
+                    judge_model=judge_model,
+                    judge_strictness=judge_strictness,
                 )
             except BudgetExceeded as e:
                 print(f"\n[budget] stopped: {e}. {written} trials written; rerun to resume.")

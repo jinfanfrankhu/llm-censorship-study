@@ -1,0 +1,24 @@
+# Exp I (prototype): semantic LLM censor vs the keyword baseline.
+# Same cell as gemma-2-27b in expH_onset_v2 (NEUTRAL v2 prompt, level 50,
+# informed) but with a semantic judge instead of the keyword filter. Key test:
+# does censor pressure ALONE force evasion to emerge, with no permission prompt?
+run_name: expI_semantic
+prompt_version: v2
+models:
+  - "google/gemma-2-27b-it"
+pairing: same_model
+conditions:
+  informed: [true]
+filter:
+  mode: semantic
+  judge_model: "openai/gpt-4o-mini"   # cheap, capable judge
+  strictness: obvious                 # block only unmistakable reveals (winnable)
+  redaction: per_char                 # unused in semantic mode
+  forbidden_levels: [50]              # used only for audit-flag detection
+max_turns: 5
+runs_per_item: 1
+sampling:
+  temperature: 0.7
+  max_tokens: 300
+seed_base: 1234
+budget_usd_max: 50.00

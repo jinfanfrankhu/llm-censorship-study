@@ -73,11 +73,18 @@ def run_trial(
     seed: int,
     prompt_version: str = PROMPT_VERSION,
     receiver_model: str | None = None,
+    filter_mode: str = "keyword",
+    judge_model: str | None = None,
+    judge_strictness: str = "obvious",
 ) -> dict:
     receiver_model = receiver_model or model  # same-model pairing by default
     target = item["target"]
     forbidden = item["forbidden"][:forbidden_level]  # top-N most-obvious clues
-    blocker = BlockingFilter(target, forbidden, redaction=redaction)
+    if filter_mode == "semantic":
+        from .semantic_filter import SemanticFilter
+        blocker = SemanticFilter(target, client, judge_model, strictness=judge_strictness)
+    else:
+        blocker = BlockingFilter(target, forbidden, redaction=redaction)
 
     sender_sys = sender_system_prompt(target, forbidden, informed, version=prompt_version)
     sender_msgs = [{"role": "system", "content": sender_sys}]
@@ -186,6 +193,7 @@ def run_trial(
         "run_index": run_index,
         "seed": seed,
         "redaction": redaction,
+        "filter_mode": filter_mode,
         "turns": turns,
         "success": success,
         "turns_to_success": turns_to_success,
