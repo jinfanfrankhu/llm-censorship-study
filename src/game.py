@@ -86,6 +86,9 @@ def run_trial(
     elif filter_mode == "blind":
         from .censor import BlindCensor
         blocker = BlindCensor(client, judge_model, strictness=judge_strictness)
+    elif filter_mode == "topic":
+        from .censor import TopicCensor
+        blocker = TopicCensor(target, client, judge_model, strictness=judge_strictness)
     else:
         blocker = BlockingFilter(target, forbidden, redaction=redaction)
 
