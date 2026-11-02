@@ -171,6 +171,27 @@ flips only "may I evade?", so diffing activations localizes **what gates the
 deployment of a latent, suppressed capability** — a general and timely interp
 question (instruction-gated behavior / capability elicitation).
 
+## Experiment F — cross-model pairing (level 50, informed)
+
+160 trials. Strong (gpt-4.1) / weak (qwen-7b) sender × receiver 2×2 decomposes
+whether censored-communication success is a sender or a receiver property:
+
+| sender → receiver | success | redaction |
+|-------------------|:---:|:---:|
+| gpt → gpt   | 1.00 | 0.55 |
+| gpt → qwen  | 0.95 | 0.63 |
+| qwen → gpt  | 0.90 | 0.85 |
+| qwen → qwen | 0.53 | 0.88 |
+
+From the weak-weak baseline (0.53), upgrading **either** side rescues success
+(strong receiver alone → 0.90; strong sender alone → 0.95). Censorship only
+bites when both are weak. Redaction depends only on the sender (it is the
+sender's word choice that collides with the filter), so the qwen→gpt rescue
+shows a strong receiver succeeds by **reconstructing meaning from the redacted
+skeleton**, not by reducing redaction. Robust communication under censorship is
+thus two separable competencies — sender avoidance/description and receiver
+inference — and either can carry the pair.
+
 ## Mech-interp hooks (for the eventual interpretability study)
 
 Because spontaneous orthographic evasion is rare, the higher-signal targets are:
