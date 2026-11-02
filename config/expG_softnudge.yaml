@@ -1,0 +1,24 @@
+# Exp G: dose-response on the evasion gate. v4 soft-nudges "creativity" but
+# names no tactic. If models evade here, a hint suffices; if only v3 (explicit)
+# elicits evasion, the gate needs explicit permission. Same cell as Exp E.
+run_name: expG_softnudge
+prompt_version: v4
+models:
+  - "meta-llama/llama-3.1-8b-instruct"
+  - "qwen/qwen-2.5-7b-instruct"
+  - "meta-llama/llama-3.3-70b-instruct"
+  - "openai/gpt-4.1"
+pairing: same_model
+conditions:
+  informed: [true]
+filter:
+  mode: keyword
+  redaction: per_char
+  forbidden_levels: [50]
+max_turns: 5
+runs_per_item: 2
+sampling:
+  temperature: 0.7
+  max_tokens: 300
+seed_base: 1234
+budget_usd_max: 50.00
