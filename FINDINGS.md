@@ -3,7 +3,7 @@
 **Status:** pilot in progress. This document is generated/curated from the runs
 in `data/raw/`. Numbers are from real OpenRouter calls (not simulated).
 
-## TL;DR (1,120 real trials across 5 runs)
+## TL;DR (1,280 real trials across 6 runs)
 
 1. **Instruction-vs-feedback dissociation (the headline).** Told which words are
    blocked, strong models avoid them (redaction: gpt-4.1 0.34, llama-70b 0.22).
@@ -13,10 +13,13 @@ in `data/raw/`. Numbers are from real OpenRouter calls (not simulated).
    them.
 2. **No spontaneous censorship awareness.** In the uninformed arm, ~0% of trials
    (any model, incl. gpt-4.1) ever mention the filter despite seeing `####`.
-3. **Zero orthographic evasion at any scale.** 0 leetspeak across 1,120 trials;
-   all spacing/substring flags are natural-language artifacts. The whole observed
-   strategy space is semantic (describe / circumlocute / hypernym), never codes
-   or misspellings — true at 7B and at frontier.
+3. **Evasion is a latent, scale-gated capability that is not deployed
+   spontaneously.** Across 960 neutral-prompt trials: 0 orthographic evasion.
+   But when *explicitly permitted* (v3), gpt-4.1 and llama-70b readily produce
+   leetspeak ("h0m3", "wh33ls", "r@@f") and letter-spacing ("p_a_r_k_i_n_g",
+   "d_r_i_v_e") — llama-70b cuts its redaction 0.41→0.12 by routing words past
+   the filter. Small models (7–8B) do not evade even when permitted. So large
+   models **can** evade and **won't** unless told; small models **can't**.
 4. **Scale solves the task; the filter barely impedes big models.** llama-70b
    and gpt-4.1 ≈ 100% success, ~1–1.5 turns, even under ~100% message redaction —
    via rich, *redundant* description, not evasion. 7–8B models are filter-limited
@@ -136,6 +139,37 @@ Same model, same target, one knob (told vs not):
   near the #####, that helps ##### ##### safely at ##### with its bright ####."
   It uses the obvious (blocked) words, never notices the shredding, and still
   wins because the receiver reconstructs from the skeleton.
+
+## Experiment E — permission-to-evade (can't vs won't), level 50, informed
+
+160 trials, prompt v3 (explicitly permits spelling tricks/spacing/codes), run
+with the tightened audit detector so flags are real. Evasion flags vs the neutral
+v2 baseline (same cell):
+
+| model | v2 leet/space | v3 leet/space | redaction v2→v3 |
+|-------|:---:|:---:|:---:|
+| llama-8b  | 0 / 2 | 0 / 0 | 0.59→0.41 |
+| qwen-7b   | 0 / 0 | 0 / 1 | 0.88→0.66 |
+| llama-70b | 0 / 0 | **5 / 5** | 0.41→**0.12** |
+| gpt-4.1   | 0 / 0 | **4 / 21** | 0.55→0.57 |
+
+**Interpretation — a clean capability/deployment dissociation.** Large models
+*have* a fluent orthographic-evasion capability (real samples below) but do not
+deploy it under identical censorship pressure unless a single sentence of
+permission is added. Small models cannot do it even when told. The capability
+emerges at ~70B+.
+
+Real evasion samples (v3):
+- llama-70b: "people often keep in their **h0m3** as a **b3st fri3nd** … a
+  **l0v3d c0mpani0n**"; "find in a **p_a_r_k_i_n_g** lot … **d_r_i_v_e**".
+- gpt-4.1: "often on four **wh33ls**"; "a place with a **r@@f**, **w@lls**, and
+  a **d00r**".
+
+This is arguably a *better* mech-interp target than the instruction/feedback
+dissociation: the v2→v3 contrast holds the model, filter, and target fixed and
+flips only "may I evade?", so diffing activations localizes **what gates the
+deployment of a latent, suppressed capability** — a general and timely interp
+question (instruction-gated behavior / capability elicitation).
 
 ## Mech-interp hooks (for the eventual interpretability study)
 
