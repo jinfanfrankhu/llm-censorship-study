@@ -11,7 +11,8 @@ import json
 import re
 
 from .filter import BlockingFilter, audit_flags
-from .prompts import PROMPT_VERSION, receiver_system_prompt, sender_system_prompt
+from .prompts import DEFAULT_PROMPT_VERSION as PROMPT_VERSION
+from .prompts import receiver_system_prompt, sender_system_prompt
 
 
 # --------------------------------------------------------------------------- #
@@ -70,16 +71,17 @@ def run_trial(
     redaction: str,
     sampling: dict,
     seed: int,
+    prompt_version: str = PROMPT_VERSION,
 ) -> dict:
     target = item["target"]
     forbidden = item["forbidden"][:forbidden_level]  # top-N most-obvious clues
     blocker = BlockingFilter(target, forbidden, redaction=redaction)
 
-    sender_sys = sender_system_prompt(target, forbidden, informed)
+    sender_sys = sender_system_prompt(target, forbidden, informed, version=prompt_version)
     sender_msgs = [{"role": "system", "content": sender_sys}]
     sender_msgs.append({"role": "user", "content": "Send your first clue."})
 
-    receiver_msgs = [{"role": "system", "content": receiver_system_prompt()}]
+    receiver_msgs = [{"role": "system", "content": receiver_system_prompt(version=prompt_version)}]
 
     turns: list[dict] = []
     errors: list[str] = []
@@ -168,7 +170,7 @@ def run_trial(
         sender_msgs.append({"role": "user", "content": feedback})
 
     return {
-        "prompt_version": PROMPT_VERSION,
+        "prompt_version": prompt_version,
         "item_id": item["item_id"],
         "target": target,
         "forbidden": forbidden,

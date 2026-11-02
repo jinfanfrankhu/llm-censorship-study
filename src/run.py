@@ -77,6 +77,7 @@ def main():
     sampling = cfg["sampling"]
     seed_base = cfg["seed_base"]
     budget = cfg["budget_usd_max"]
+    prompt_version = cfg.get("prompt_version", "v2")
 
     out_path = Path("data/raw") / f"{run_name}.jsonl"
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -123,6 +124,7 @@ def main():
                     redaction=redaction,
                     sampling=sampling,
                     seed=seed_base + run_index,
+                    prompt_version=prompt_version,
                 )
                 record["run_name"] = run_name
                 out.write(json.dumps(record, ensure_ascii=False) + "\n")
