@@ -1,0 +1,25 @@
+# Exp F: cross-model pairing. Same-model pairing confounds sender clue-quality
+# with receiver inference. A 2x2 of strong(gpt-4.1)/weak(qwen-7b) sender x
+# receiver decomposes which side drives success under heavy censorship.
+# Level 50, informed, all targets, 2 runs = 4 pairs x 20 x 2 = 160.
+run_name: expF_crosspair
+prompt_version: v2
+model_pairs:
+  - ["openai/gpt-4.1", "openai/gpt-4.1"]            # strong -> strong
+  - ["openai/gpt-4.1", "qwen/qwen-2.5-7b-instruct"] # strong sender -> weak receiver
+  - ["qwen/qwen-2.5-7b-instruct", "openai/gpt-4.1"] # weak sender -> strong receiver
+  - ["qwen/qwen-2.5-7b-instruct", "qwen/qwen-2.5-7b-instruct"]  # weak -> weak
+pairing: cross
+conditions:
+  informed: [true]
+filter:
+  mode: keyword
+  redaction: per_char
+  forbidden_levels: [50]
+max_turns: 5
+runs_per_item: 2
+sampling:
+  temperature: 0.7
+  max_tokens: 300
+seed_base: 1234
+budget_usd_max: 50.00

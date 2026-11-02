@@ -72,7 +72,9 @@ def run_trial(
     sampling: dict,
     seed: int,
     prompt_version: str = PROMPT_VERSION,
+    receiver_model: str | None = None,
 ) -> dict:
+    receiver_model = receiver_model or model  # same-model pairing by default
     target = item["target"]
     forbidden = item["forbidden"][:forbidden_level]  # top-N most-obvious clues
     blocker = BlockingFilter(target, forbidden, redaction=redaction)
@@ -108,7 +110,7 @@ def run_trial(
 
         # 3. Receiver sees filtered clue only
         receiver_msgs.append({"role": "user", "content": f"Clue: {fr.filtered}"})
-        rrec = client.chat(model, receiver_msgs, run_index=run_index, **sampling)
+        rrec = client.chat(receiver_model, receiver_msgs, run_index=run_index, **sampling)
         _tally(rrec)
         receiver_raw = rrec["content"]
         parsed = _extract_json(receiver_raw)
@@ -119,7 +121,7 @@ def run_trial(
             receiver_msgs.append(
                 {"role": "user", "content": 'Please respond with valid JSON only: {"guess": "<one word>", "message": "<optional>"}.'}
             )
-            rrec2 = client.chat(model, receiver_msgs, run_index=run_index, **sampling)
+            rrec2 = client.chat(receiver_model, receiver_msgs, run_index=run_index, **sampling)
             _tally(rrec2)
             receiver_raw = rrec2["content"]
             parsed = _extract_json(receiver_raw)
@@ -177,7 +179,9 @@ def run_trial(
         "forbidden_level": forbidden_level,
         "freq_band": item.get("freq_band"),
         "zipf": item.get("zipf"),
-        "model": model,
+        "model": model,              # sender model (kept for existing analysis)
+        "sender_model": model,
+        "receiver_model": receiver_model,
         "informed": informed,
         "run_index": run_index,
         "seed": seed,

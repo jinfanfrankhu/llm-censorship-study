@@ -52,7 +52,8 @@ def existing_keys(out_path: Path) -> set[tuple]:
             if not line:
                 continue
             r = json.loads(line)
-            keys.add((r["item_id"], r["model"], r["informed"], r["forbidden_level"], r["run_index"]))
+            keys.add((r["item_id"], r["model"], r.get("receiver_model", r["model"]),
+                      r["informed"], r["forbidden_level"], r["run_index"]))
     return keys
 
 
@@ -68,7 +69,7 @@ def main():
     items = load_stimuli(args.stimuli)
 
     run_name = cfg["run_name"]
-    models = cfg["models"]
+    models = cfg.get("models", [])
     informed_conditions = cfg["conditions"]["informed"]
     forbidden_levels = cfg["filter"]["forbidden_levels"]
     redaction = cfg["filter"]["redaction"]
@@ -94,16 +95,20 @@ def main():
                 f"{len(item['forbidden'])} forbidden words; levels above that use all of them."
             )
 
+    # model pairs: explicit [sender, receiver] list, else same-model pairing.
+    model_pairs = cfg.get("model_pairs")
+    pairs = [tuple(p) for p in model_pairs] if model_pairs else [(m, m) for m in models]
+
     # Build the full trial grid.
     grid = []
     for item in items:
-        for model in models:
+        for sender, receiver in pairs:
             for informed in informed_conditions:
                 for level in forbidden_levels:
                     for run_index in range(runs_per_item):
-                        grid.append((item, model, informed, level, run_index))
+                        grid.append((item, sender, receiver, informed, level, run_index))
 
-    todo = [g for g in grid if (g[0]["item_id"], g[1], g[2], g[3], g[4]) not in done]
+    todo = [g for g in grid if (g[0]["item_id"], g[1], g[2], g[3], g[4], g[5]) not in done]
     if args.limit is not None:
         todo = todo[: args.limit]
 
@@ -112,12 +117,13 @@ def main():
     written = 0
     failed = 0
     with open(out_path, "a", encoding="utf-8") as out:
-        for item, model, informed, level, run_index in tqdm(todo, desc=run_name):
+        for item, sender, receiver, informed, level, run_index in tqdm(todo, desc=run_name):
             try:
                 record = run_trial(
                     client,
                     item=item,
-                    model=model,
+                    model=sender,
+                    receiver_model=receiver,
                     informed=informed,
                     forbidden_level=level,
                     run_index=run_index,
@@ -134,7 +140,7 @@ def main():
                 # Keep an unattended run alive: skip this trial (it stays absent
                 # from the output, so a later rerun retries it) and continue.
                 failed += 1
-                tqdm.write(f"[error] {item['item_id']} {model} inf={informed} "
+                tqdm.write(f"[error] {item['item_id']} {sender}>>{receiver} inf={informed} "
                            f"lvl={level} run={run_index}: {type(e).__name__}: {str(e)[:120]}")
                 continue
             record["run_name"] = run_name
