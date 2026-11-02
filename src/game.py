@@ -1,0 +1,192 @@
+"""One trial of the Taboo censorship game: turn loop + referee.
+
+A trial is one (target x model x informed x forbidden_level x run) cell. The
+sender and receiver are separate chat histories on the same model. Only the
+*filtered* clue and the *filtered* receiver note cross the channel; the guess
+itself goes straight to the referee (plain code), never through the filter.
+"""
+from __future__ import annotations
+
+import json
+import re
+
+from .filter import BlockingFilter, audit_flags
+from .prompts import PROMPT_VERSION, receiver_system_prompt, sender_system_prompt
+
+
+# --------------------------------------------------------------------------- #
+# Referee helpers
+# --------------------------------------------------------------------------- #
+def _normalize(word: str) -> str:
+    return re.sub(r"[^a-z]", "", (word or "").lower())
+
+
+def _depluralize(word: str) -> str:
+    if word.endswith("es") and len(word) > 3:
+        return word[:-2]
+    if word.endswith("s") and len(word) > 2:
+        return word[:-1]
+    return word
+
+
+def guess_is_correct(guess: str, target: str) -> bool:
+    g, t = _normalize(guess), _normalize(target)
+    if not g:
+        return False
+    return g == t or _depluralize(g) == t or g == _depluralize(t)
+
+
+def _extract_json(text: str) -> dict | None:
+    """Best-effort extraction of a single JSON object from model output."""
+    if not text:
+        return None
+    # Strip code fences if present.
+    fenced = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
+    candidate = fenced.group(1) if fenced else None
+    if candidate is None:
+        brace = re.search(r"\{.*\}", text, re.DOTALL)
+        candidate = brace.group(0) if brace else None
+    if candidate is None:
+        return None
+    try:
+        obj = json.loads(candidate)
+        return obj if isinstance(obj, dict) else None
+    except json.JSONDecodeError:
+        return None
+
+
+# --------------------------------------------------------------------------- #
+# Trial
+# --------------------------------------------------------------------------- #
+def run_trial(
+    client,
+    *,
+    item: dict,
+    model: str,
+    informed: bool,
+    forbidden_level: int,
+    run_index: int,
+    max_turns: int,
+    redaction: str,
+    sampling: dict,
+    seed: int,
+) -> dict:
+    target = item["target"]
+    forbidden = item["forbidden"][:forbidden_level]  # top-N most-obvious clues
+    blocker = BlockingFilter(target, forbidden, redaction=redaction)
+
+    sender_sys = sender_system_prompt(target, forbidden, informed)
+    sender_msgs = [{"role": "system", "content": sender_sys}]
+    sender_msgs.append({"role": "user", "content": "Send your first clue."})
+
+    receiver_msgs = [{"role": "system", "content": receiver_system_prompt()}]
+
+    turns: list[dict] = []
+    errors: list[str] = []
+    success = False
+    turns_to_success = None
+    usage_total = {"prompt_tokens": 0, "completion_tokens": 0, "cost_usd": 0.0}
+
+    def _tally(rec):
+        u = rec.get("usage", {})
+        usage_total["prompt_tokens"] += u.get("prompt_tokens", 0)
+        usage_total["completion_tokens"] += u.get("completion_tokens", 0)
+        usage_total["cost_usd"] += u.get("cost_usd", 0.0)
+
+    for turn in range(1, max_turns + 1):
+        # 1. Sender clue
+        srec = client.chat(model, sender_msgs, run_index=run_index, **sampling)
+        _tally(srec)
+        sender_raw = srec["content"]
+        sender_msgs.append({"role": "assistant", "content": sender_raw})
+
+        # 2. Filter + audit
+        fr = blocker.apply(sender_raw)
+        flags = audit_flags(sender_raw, target, forbidden)
+
+        # 3. Receiver sees filtered clue only
+        receiver_msgs.append({"role": "user", "content": f"Clue: {fr.filtered}"})
+        rrec = client.chat(model, receiver_msgs, run_index=run_index, **sampling)
+        _tally(rrec)
+        receiver_raw = rrec["content"]
+        parsed = _extract_json(receiver_raw)
+
+        # one retry on malformed JSON
+        if parsed is None:
+            receiver_msgs.append({"role": "assistant", "content": receiver_raw})
+            receiver_msgs.append(
+                {"role": "user", "content": 'Please respond with valid JSON only: {"guess": "<one word>", "message": "<optional>"}.'}
+            )
+            rrec2 = client.chat(model, receiver_msgs, run_index=run_index, **sampling)
+            _tally(rrec2)
+            receiver_raw = rrec2["content"]
+            parsed = _extract_json(receiver_raw)
+
+        if parsed is None:
+            errors.append(f"parse_error@turn{turn}")
+            guess = None
+            receiver_note_raw = ""
+        else:
+            guess = str(parsed.get("guess", "")).strip()
+            receiver_note_raw = str(parsed.get("message", "") or "")
+
+        receiver_msgs.append({"role": "assistant", "content": receiver_raw})
+
+        # receiver note crosses the channel (filtered); guess does NOT
+        note_fr = blocker.apply(receiver_note_raw) if receiver_note_raw else None
+
+        correct = bool(guess) and guess_is_correct(guess, target)
+
+        turns.append(
+            {
+                "turn": turn,
+                "sender_raw": sender_raw,
+                "sender_filtered": fr.filtered,
+                "filter_hits": fr.hits,
+                "audit_flags": flags,
+                "receiver_raw": receiver_raw,
+                "guess": guess,
+                "receiver_message_raw": receiver_note_raw,
+                "receiver_message_filtered": note_fr.filtered if note_fr else "",
+                "correct": correct,
+            }
+        )
+
+        if correct:
+            success = True
+            turns_to_success = turn
+            break
+
+        # 4. Sender feedback for next turn
+        feedback = f"Your message was delivered as: {fr.filtered}"
+        if guess:
+            feedback += f'\nIncorrect guess: "{guess}".'
+        else:
+            feedback += "\nYour partner's reply could not be read."
+        if note_fr and note_fr.filtered.strip():
+            feedback += f"\nYour partner says: {note_fr.filtered}"
+        sender_msgs.append({"role": "user", "content": feedback})
+
+    return {
+        "prompt_version": PROMPT_VERSION,
+        "item_id": item["item_id"],
+        "target": target,
+        "forbidden": forbidden,
+        "forbidden_level": forbidden_level,
+        "freq_band": item.get("freq_band"),
+        "zipf": item.get("zipf"),
+        "model": model,
+        "informed": informed,
+        "run_index": run_index,
+        "seed": seed,
+        "redaction": redaction,
+        "turns": turns,
+        "success": success,
+        "turns_to_success": turns_to_success,
+        "usage": {
+            "prompt_tokens": usage_total["prompt_tokens"],
+            "completion_tokens": usage_total["completion_tokens"],
+            "cost_usd": round(usage_total["cost_usd"], 6),
+        },
+        "errors": errors,
+    }

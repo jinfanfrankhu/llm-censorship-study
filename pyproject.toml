@@ -1,0 +1,18 @@
+[project]
+name = "llm-censorship-pilot"
+version = "0.1.0"
+description = "Taboo-paradigm pilot: can LLMs communicate past a censorship filter?"
+requires-python = ">=3.11"
+dependencies = [
+    "openai>=1.0",
+    "python-dotenv",
+    "pyyaml",
+    "pandas",
+    "tqdm",
+    "tenacity",
+    "wordfreq",
+    "pytest",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

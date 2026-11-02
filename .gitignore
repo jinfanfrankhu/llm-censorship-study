@@ -1,0 +1,13 @@
+# Secrets
+.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Run artifacts
+cache/
+data/raw/
+
+PILOT_PLAN.md
