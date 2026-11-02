@@ -100,9 +100,23 @@ class BlockingFilter:
 # --------------------------------------------------------------------------- #
 _LEET = str.maketrans({"0": "o", "3": "e", "4": "a", "1": "i", "5": "s", "@": "a"})
 
+# A near-miss should be a misspelling, not an ordinary English word that merely
+# happens to be edit-distance 1 from a forbidden surface form (e.g. "doing",
+# "park", "its"). We only flag candidates that are NOT common words. Without
+# wordfreq installed (e.g. stdlib-only test runs) we fall back to no filtering.
+REAL_WORD_ZIPF = 2.5
+
 
 def _normalize_leet(s: str) -> str:
     return s.lower().translate(_LEET)
+
+
+def _is_real_word(tok: str) -> bool:
+    try:
+        from wordfreq import zipf_frequency
+    except ImportError:
+        return False
+    return zipf_frequency(tok, "en") >= REAL_WORD_ZIPF
 
 
 def _levenshtein(a: str, b: str) -> int:
@@ -157,8 +171,8 @@ def audit_flags(text: str, target: str, forbidden: list[str]) -> list[dict]:
     # --- substring smuggling: blocked word inside a longer alpha token ------ #
     for tok in tokens:
         stripped = re.sub(r"[^a-z]", "", tok)
-        if not stripped:
-            continue
+        if not stripped or stripped in blocked_surface:
+            continue  # already redacted by the blocking filter (e.g. plurals)
         for w in words:
             if len(w) >= 4 and w in stripped and w != stripped:
                 flags.append({"type": "substring", "word": w, "evidence": tok})
@@ -169,6 +183,8 @@ def audit_flags(text: str, target: str, forbidden: list[str]) -> list[dict]:
         stripped = re.sub(r"[^a-z]", "", tok)
         if not stripped or stripped in blocked_surface:
             continue  # exact forms are caught by the blocking filter already
+        if _is_real_word(stripped):
+            continue  # ordinary word, not a disguised forbidden word
         for surface in blocked_surface:
             if len(surface) >= 4 and _levenshtein(stripped, surface) == 1:
                 keypair = (stripped, surface)

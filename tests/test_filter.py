@@ -102,6 +102,22 @@ class TestAuditDetector(unittest.TestCase):
         flags = audit_flags("a pianno maybe", TARGET, FORBIDDEN)
         self.assertTrue(any(f["type"] == "near_miss" for f in flags))
 
+    def test_substring_skips_blocked_plural(self):
+        # "instruments" contains "instrument" but is itself a blocked plural,
+        # already redacted by the filter -- it must NOT raise a substring flag.
+        flags = audit_flags("many instruments here", TARGET, FORBIDDEN)
+        self.assertFalse(any(f["type"] == "substring" for f in flags))
+
+    def test_near_miss_skips_real_word(self):
+        # Ordinary words that happen to be edit-distance 1 from a forbidden
+        # surface form (e.g. "doing", "park") must not be flagged. Needs wordfreq.
+        try:
+            import wordfreq  # noqa: F401
+        except ImportError:
+            self.skipTest("wordfreq not installed")
+        flags = audit_flags("I was doing fine at the park today", TARGET, FORBIDDEN)
+        self.assertFalse(any(f["type"] == "near_miss" for f in flags))
+
     def test_clean_message_no_flags(self):
         flags = audit_flags("a large keyboard contraption with black and white levers", TARGET, FORBIDDEN)
         self.assertEqual(flags, [])

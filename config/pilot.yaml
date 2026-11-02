@@ -13,9 +13,12 @@ run_name: pilot_v1
 # to just the small open model anytime to minimize spend.
 # --------------------------------------------------------------------------- #
 models:
-  - "meta-llama/llama-3.1-8b-instruct"     # small open -- interp workhorse (free Colab / 1 GPU)
-  - "qwen/qwen-2.5-72b-instruct"           # large open -- behavioral scaling (interp via NDIF)
-  - "anthropic/claude-3.5-haiku"           # frontier closed -- ceiling reference only (no interp)
+  # Dense small open models: clean for later mech-interp (TransformerLens/nnsight)
+  # and pennies to run. Both confirmed present in the OpenRouter catalog.
+  - "meta-llama/llama-3.1-8b-instruct"     # dense 8B -- interp workhorse (free Colab / 1 GPU)
+  - "qwen/qwen-2.5-7b-instruct"            # dense 7B -- different family, strong tooling
+  # Add a 70B open (qwen/qwen-2.5-72b-instruct) for scaling once the small run lands.
+  # Closed frontier models dropped: 10-25x cost and cannot be interpreted.
 
 pairing: same_model        # sender and receiver are the same model (pilot)
 
@@ -30,10 +33,12 @@ filter:
   # level 50 will fall back to all 20 (the runner warns). Extend targets.csv
   # to >=50 ranked words (model-drafted, Frank-approved) before the real
   # 50-word run. Until then, [10, 20] runs cleanly.
-  forbidden_levels: [10, 20, 50]
+  # Small-start sweep: low vs high censorship to see where the effect lands.
+  # Add 20 (-> [10, 20, 50]) when expanding to the full grid.
+  forbidden_levels: [10, 50]
 
 max_turns: 5               # sender clue turns per trial
-runs_per_item: 3           # independent repetitions per target x model x condition x level
+runs_per_item: 2           # small start; raise to 3 for the full grid
 
 sampling:
   temperature: 0.7
