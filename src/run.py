@@ -110,9 +110,10 @@ def main():
     print(f"{len(grid)} trials total | {len(done)} already done | running {len(todo)} now")
 
     written = 0
-    try:
-        with open(out_path, "a", encoding="utf-8") as out:
-            for item, model, informed, level, run_index in tqdm(todo, desc=run_name):
+    failed = 0
+    with open(out_path, "a", encoding="utf-8") as out:
+        for item, model, informed, level, run_index in tqdm(todo, desc=run_name):
+            try:
                 record = run_trial(
                     client,
                     item=item,
@@ -126,16 +127,23 @@ def main():
                     seed=seed_base + run_index,
                     prompt_version=prompt_version,
                 )
-                record["run_name"] = run_name
-                out.write(json.dumps(record, ensure_ascii=False) + "\n")
-                out.flush()
-                written += 1
-    except BudgetExceeded as e:
-        print(f"\n[budget] stopped: {e}. {written} trials written; rerun to resume.")
-        return
+            except BudgetExceeded as e:
+                print(f"\n[budget] stopped: {e}. {written} trials written; rerun to resume.")
+                return
+            except Exception as e:
+                # Keep an unattended run alive: skip this trial (it stays absent
+                # from the output, so a later rerun retries it) and continue.
+                failed += 1
+                tqdm.write(f"[error] {item['item_id']} {model} inf={informed} "
+                           f"lvl={level} run={run_index}: {type(e).__name__}: {str(e)[:120]}")
+                continue
+            record["run_name"] = run_name
+            out.write(json.dumps(record, ensure_ascii=False) + "\n")
+            out.flush()
+            written += 1
 
     spend = getattr(client, "spend_usd", 0.0)
-    print(f"done. wrote {written} trials. approx spend ${spend:.4f}")
+    print(f"done. wrote {written} trials ({failed} failed/skipped). approx spend ${spend:.4f}")
 
 
 if __name__ == "__main__":

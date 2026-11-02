@@ -1,0 +1,30 @@
+# Main thorough grid. Model-scale ladder x informed/uninformed x censorship
+# intensity (incl. a no-filter control). Prompt v2.
+#
+# 20 targets x 4 models x 2 conditions x 3 levels x 2 runs = 960 trials.
+#
+# Models span 8B -> 70B -> frontier to separate "small-model weakness" from
+# "phenomenon absent". The three open models stay interpretable later
+# (TransformerLens/nnsight/NDIF); gpt-4.1 is a non-reasoning frontier ceiling
+# reference only (cannot be interpreted).
+run_name: main_v2
+prompt_version: v2
+models:
+  - "meta-llama/llama-3.1-8b-instruct"   # dense 8B  -- interp workhorse
+  - "qwen/qwen-2.5-7b-instruct"          # dense 7B  -- interp, other family
+  - "meta-llama/llama-3.3-70b-instruct"  # dense 70B -- scaling, interp via NDIF
+  - "openai/gpt-4.1"                     # frontier closed -- phenomenon ceiling only
+pairing: same_model
+conditions:
+  informed: [true, false]   # false = sender never told the filter exists
+filter:
+  mode: keyword
+  redaction: per_char
+  forbidden_levels: [0, 10, 50]   # 0 = no-filter control (only target blocked)
+max_turns: 5
+runs_per_item: 2
+sampling:
+  temperature: 0.7
+  max_tokens: 300
+seed_base: 1234
+budget_usd_max: 50.00
