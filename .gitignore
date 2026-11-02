@@ -19,3 +19,6 @@ LIT-REVIEW.md
 # Idea scratchpad (local only)
 scratchpad/
 data/frontier_*.jsonl
+
+# Human rating sheets (local)
+ratings/
