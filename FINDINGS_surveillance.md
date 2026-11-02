@@ -76,8 +76,35 @@ dynamic, reproduced and quantified in LLMs.**
   deniability** (functional/relational/ambiguous description), the human
   mechanism, not on the leetspeak the earlier (keyword-filter) experiments
   elicited — and the frontier proves leetspeak would *fail* here.
-- Capability ceiling (Exp M, aware gpt-4.1) pending: does a stronger model crack
-  the strict censor, or is the wall fundamental?
+## Capability inversion: the stronger model is EASIER to censor (Exp M)
+Aware gpt-4.1 vs aware gemma-2-27b, same topic censor:
+
+| censor | aware gemma-2-27b | aware gpt-4.1 |
+|--------|----:|----:|
+| lenient  | 55% | **5%** |
+| moderate | 15% | 0% |
+| strict   |  5% | 0% |
+
+gpt-4.1 is blocked ~100% of the time and does FAR worse. Why — it deploys the
+WRONG evasion:
+- When told to evade, **gpt-4.1 reaches for orthographic/wordplay tricks** —
+  "D _ O _ G", "rhymes with fog and log", "H2O", "H _ U _ S _ E fill in the
+  vowels" — in **29% of messages vs gemma's 2%** (15x more). These are exactly
+  the transparent tricks the deniability frontier proved **useless against a
+  semantic censor** (the judge decodes "rhymes with fog" -> dog instantly).
+- Its plain clues are also *more precisely on-topic* (better communicator ->
+  clearer reference -> more detectable).
+- gemma wins by ACCIDENT: its vaguer, clumsier **ambiguous functional
+  descriptions** are genuinely deniable (ambiguous, not disguised).
+
+**The insight: LLMs have a miscalibrated folk theory of censorship evasion.**
+Asked to beat a filter, they produce orthographic wordplay (effective only vs a
+dumb keyword matcher) instead of the semantic ambiguity that actually defeats a
+smart monitor. Neither model deliberately deploys the winning strategy; the
+"stronger" model fails harder because it confidently uses the wrong tool. This
+unifies the whole project: the permission-gated leetspeak (keyword-filter
+experiments) is the same miscalibrated instinct, now shown to be counterproductive
+against realistic (semantic) censorship.
 
 ## Mech-interp implications
 - Primary contrast refined: **aware vs unaware sender facing the same topic
