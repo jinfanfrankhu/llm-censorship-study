@@ -1,0 +1,23 @@
+# Exp M (moderate): AWARE gpt-4.1 sender vs topic censor. Capability-ceiling test:
+# can a stronger model sustain deniable communication where gemma-2-27b failed
+# (esp. against the strict censor)?
+run_name: expM_awaregpt_moderate
+prompt_version: v5
+models:
+  - "openai/gpt-4.1"
+pairing: same_model
+conditions:
+  informed: [true]
+filter:
+  mode: topic
+  judge_model: "openai/gpt-4o-mini"
+  strictness: moderate
+  redaction: per_char
+  forbidden_levels: [50]
+max_turns: 6
+runs_per_item: 1
+sampling:
+  temperature: 0.7
+  max_tokens: 300
+seed_base: 1234
+budget_usd_max: 50.00
