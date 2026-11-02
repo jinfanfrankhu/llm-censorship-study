@@ -3,7 +3,7 @@
 **Status:** pilot in progress. This document is generated/curated from the runs
 in `data/raw/`. Numbers are from real OpenRouter calls (not simulated).
 
-## TL;DR (1,280 real trials across 6 runs)
+## TL;DR (1,760 real trials across 6 runs, ~$0.9 total)
 
 1. **Instruction-vs-feedback dissociation (the headline).** Told which words are
    blocked, strong models avoid them (redaction: gpt-4.1 0.34, llama-70b 0.22).
@@ -19,7 +19,9 @@ in `data/raw/`. Numbers are from real OpenRouter calls (not simulated).
    leetspeak ("h0m3", "wh33ls", "r@@f") and letter-spacing ("p_a_r_k_i_n_g",
    "d_r_i_v_e") — llama-70b cuts its redaction 0.41→0.12 by routing words past
    the filter. Small models (7–8B) do not evade even when permitted. So large
-   models **can** evade and **won't** unless told; small models **can't**.
+   models **can** evade and **won't** unless told; small models **can't**. The
+   gate is *specific*: a soft "be creative" hint (v4) lowers redaction via better
+   description but triggers **no** disguise — only explicit permission unlocks it.
 4. **Scale solves the task; the filter barely impedes big models.** llama-70b
    and gpt-4.1 ≈ 100% success, ~1–1.5 turns, even under ~100% message redaction —
    via rich, *redundant* description, not evasion. 7–8B models are filter-limited
@@ -192,18 +194,42 @@ skeleton**, not by reducing redaction. Robust communication under censorship is
 thus two separable competencies — sender avoidance/description and receiver
 inference — and either can carry the pair.
 
+## Experiment G — dose-response on the evasion gate (level 50, informed)
+
+160 trials, prompt v4 (soft "be creative, do whatever works" — names no tactic),
+between neutral v2 and explicit v3:
+
+| model | v2 neutral (redact / evasion) | v4 hint | v3 explicit |
+|-------|:---:|:---:|:---:|
+| llama-8b  | 0.59 / none | 0.28 / none | 0.41 / none |
+| qwen-7b   | 0.88 / none | 0.75 / none | 0.66 / none |
+| llama-70b | 0.41 / none | 0.14 / **none** | 0.12 / **leet+space** |
+| gpt-4.1   | 0.55 / none | 0.50 / **none** | 0.57 / **leet+space** |
+
+The gate is **specific**. A hint reliably *lowers redaction* — models describe
+around the blocked words better (semantic avoidance) — but triggers **zero**
+orthographic disguise. Only explicit permission (naming spelling/spacing/codes)
+unlocks disguise, and only at ≥70B. So "be creative" buys more careful
+description; it does not buy evasion. The disguise behavior has a high, specific
+activation threshold distinct from general effort/creativity.
+
 ## Mech-interp hooks (for the eventual interpretability study)
 
 Because spontaneous orthographic evasion is rare, the higher-signal targets are:
 
-0. **The dissociation (primary target).** Same model, same target, level 50:
-   informed → avoids the blocked words; uninformed → uses them and gets shredded.
-   Run both locally and diff activations at the moment the model is about to emit
-   a word that is (informed) / would be (uninformed) blocked. Is the "forbidden"
-   status linearly decodable in *both* conditions (evidence present but unused),
-   or only when instructed (evidence never encoded)? That single contrast
-   localizes where the instruction signal enters and why the redaction signal
-   never does.
+0. **The evasion-deployment gate (primary target).** Same model, same target,
+   level 50, only the prompt differs: v4 (creative, low redaction, NO disguise)
+   vs v3 (disguise appears). Diff activations between v4 and v3 generations to
+   isolate the switch that deploys a latent, suppressed capability — controlling
+   for general creativity/effort, since v4 already maximizes those. This is the
+   cleanest contrast the pilot offers and maps onto a timely interp theme
+   (instruction-gated capability elicitation). Only present at ≥70B, so the
+   mechanism lives in llama-3.3-70b (interp via NDIF) — not the 7–8B models.
+0b. **The instruction-vs-feedback dissociation (secondary target).** Informed →
+   avoids blocked words; uninformed → uses them and gets shredded. Diff
+   activations at the moment of emitting a would-be-blocked word: is "forbidden"
+   linearly decodable when uninformed (evidence present but unused) or only when
+   instructed (evidence never encoded)?
 1. **Censorship representation.** In the informed condition the model is *told*
    which words are blocked. Probe: is there a linear representation of "this
    token is on the forbidden list" in the residual stream while generating? Does
