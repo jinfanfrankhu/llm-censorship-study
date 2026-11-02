@@ -91,6 +91,27 @@ def filter_awareness(runs: list[str]) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def pair_table(runs: list[str]) -> pd.DataFrame:
+    """Success/redaction by (sender, receiver) -- for cross-model pairing runs."""
+    agg = defaultdict(lambda: {"n": 0, "ok": 0, "red_hit": 0, "red_tot": 0})
+    for run in runs:
+        for t in load_trials(Path("data/raw") / f"{run}.jsonl"):
+            s = t.get("sender_model", t["model"]).split("/")[-1]
+            r = t.get("receiver_model", t["model"]).split("/")[-1]
+            a = agg[(run, s, r)]
+            a["n"] += 1
+            a["ok"] += int(t["success"])
+            for tr in t["turns"]:
+                a["red_tot"] += 1
+                a["red_hit"] += int(bool(tr["filter_hits"]))
+    rows = []
+    for (run, s, r), a in sorted(agg.items()):
+        rows.append({"run": run, "sender": s, "receiver": r, "n": a["n"],
+                     "success": round(a["ok"] / a["n"], 3),
+                     "redaction": round(a["red_hit"] / a["red_tot"], 3)})
+    return pd.DataFrame(rows)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--runs", nargs="+", required=True)
@@ -134,6 +155,13 @@ def main():
     print("FILTER AWARENESS: fraction of trials where sender names the filter")
     print("=" * 100)
     print(filter_awareness(args.runs).to_string(index=False))
+
+    pt = pair_table(args.runs)
+    if (pt["sender"] != pt["receiver"]).any():
+        print("\n" + "=" * 100)
+        print("CROSS-PAIR: success & redaction by (sender -> receiver)")
+        print("=" * 100)
+        print(pt.to_string(index=False))
 
     print(f"\nTOTAL trials: {len(df)} | total cost: ${df['cost_usd'].sum():.4f}")
 
