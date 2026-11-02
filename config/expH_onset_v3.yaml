@@ -1,0 +1,25 @@
+# Exp H (permission): scale-onset sweep for the evasion gate. Find the SMALLEST
+# model that deploys real evasion when permitted (v3). Pairs with expH_onset_v2
+# (neutral baseline) to confirm gating. Level 50, informed, all targets, 2 runs.
+# Includes llama-3.1-70b specifically because NDIF hosts it (free interp path).
+run_name: expH_onset_v3
+prompt_version: v3
+models:
+  - "google/gemma-3-12b-it"                          # 12B dense
+  - "mistralai/mistral-small-24b-instruct-2501"      # 24B dense
+  - "google/gemma-2-27b-it"                          # 27B dense
+  - "meta-llama/llama-3.1-70b-instruct"              # 70B dense (NDIF-hosted)
+pairing: same_model
+conditions:
+  informed: [true]
+filter:
+  mode: keyword
+  redaction: per_char
+  forbidden_levels: [50]
+max_turns: 5
+runs_per_item: 2
+sampling:
+  temperature: 0.7
+  max_tokens: 300
+seed_base: 1234
+budget_usd_max: 50.00

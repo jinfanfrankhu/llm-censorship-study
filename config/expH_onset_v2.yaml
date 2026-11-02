@@ -1,0 +1,23 @@
+# Exp H (neutral baseline): same mid-size models under the neutral v2 prompt, to
+# confirm they do NOT evade spontaneously (the gating half of the onset sweep).
+run_name: expH_onset_v2
+prompt_version: v2
+models:
+  - "google/gemma-3-12b-it"
+  - "mistralai/mistral-small-24b-instruct-2501"
+  - "google/gemma-2-27b-it"
+  - "meta-llama/llama-3.1-70b-instruct"
+pairing: same_model
+conditions:
+  informed: [true]
+filter:
+  mode: keyword
+  redaction: per_char
+  forbidden_levels: [50]
+max_turns: 5
+runs_per_item: 2
+sampling:
+  temperature: 0.7
+  max_tokens: 300
+seed_base: 1234
+budget_usd_max: 50.00
