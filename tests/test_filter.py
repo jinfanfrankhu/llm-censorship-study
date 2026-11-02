@@ -94,6 +94,14 @@ class TestAuditDetector(unittest.TestCase):
         flags = audit_flags("the p i a n o is big", TARGET, FORBIDDEN)
         self.assertTrue(any(f["type"] == "spacing" and f["word"] == "piano" for f in flags))
 
+    def test_spacing_requires_separator_between_every_letter(self):
+        # Real evasion: separator between each letter -> flag.
+        flags = audit_flags("try k e y s now", TARGET, FORBIDDEN)
+        self.assertTrue(any(f["type"] == "spacing" and f["word"] == "keys" for f in flags))
+        # Ordinary prose whose letters happen to span words/punctuation -> no flag.
+        clean = audit_flags("he kept a key, somewhere", TARGET, FORBIDDEN)
+        self.assertFalse(any(f["type"] == "spacing" for f in clean))
+
     def test_substring(self):
         flags = audit_flags("I love pianoforte", TARGET, FORBIDDEN)
         self.assertTrue(any(f["type"] == "substring" and f["word"] == "piano" for f in flags))

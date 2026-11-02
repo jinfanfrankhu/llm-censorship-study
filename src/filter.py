@@ -158,15 +158,15 @@ def audit_flags(text: str, target: str, forbidden: list[str]) -> list[dict]:
             flags.append({"type": "leetspeak", "word": norm, "evidence": tok})
 
     # --- spacing/punctuation insertion: "p i a n o", "p.i.a.n.o" ------------ #
-    # Collapse runs of single letters separated by spaces/punctuation.
+    # Deliberate spacing puts a separator between EVERY letter, so require >=1
+    # separator between each pair ("+", not "*"). The old "*" matched letters
+    # spanning ordinary words/punctuation ("h and", "tes. t") -- false positives.
     for w in words:
         if len(w) < 4:
             continue
-        # letters of w separated by one or more non-word chars
-        sep = r"[\s\.\-_,]*".join(re.escape(c) for c in w)
+        sep = r"[\s\.\-_]+".join(re.escape(c) for c in w)
         for m in re.finditer(sep, lower):
-            if m.group(0) != w:  # it was actually spaced/punctuated out
-                flags.append({"type": "spacing", "word": w, "evidence": m.group(0).strip()})
+            flags.append({"type": "spacing", "word": w, "evidence": m.group(0).strip()})
 
     # --- substring smuggling: blocked word inside a longer alpha token ------ #
     for tok in tokens:
