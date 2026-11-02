@@ -9,5 +9,7 @@ __pycache__/
 # Run artifacts
 cache/
 data/raw/
+data/transcripts/
+data/metrics_*.csv
 
 PILOT_PLAN.md
