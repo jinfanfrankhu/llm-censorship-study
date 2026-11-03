@@ -148,14 +148,20 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--stimuli", default="stimuli/dogwhistle_targets.csv")
     ap.add_argument("--budget", type=float, default=2.0)
+    ap.add_argument("--out", default=str(OUT))
+    ap.add_argument("--items", default="", help="comma-separated item_ids to probe")
     a = ap.parse_args()
     load_dotenv(".env")
     from .client import Client
     client = Client(budget_usd_max=a.budget)
     items = load_dw(a.stimuli)
+    if a.items:
+        keep = set(a.items.split(","))
+        items = [i for i in items if i["item_id"] in keep]
     rows = probe(client, items)
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text("\n".join(json.dumps(r, ensure_ascii=False) for r in rows), encoding="utf-8")
+    out = Path(a.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text("\n".join(json.dumps(r, ensure_ascii=False) for r in rows), encoding="utf-8")
     fp = false_positives(client, items)
     report(rows, fp)
     print(f"\nspend this session ${client.spend_usd:.4f}")
