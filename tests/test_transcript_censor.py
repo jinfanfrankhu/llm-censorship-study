@@ -39,3 +39,14 @@ class TestTranscriptCensor(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestReplyMatcher(unittest.TestCase):
+    def test_multiword(self):
+        from src.game import reply_names_target
+        self.assertTrue(reply_names_target("To the Lighthouse", ["lighthouse"]))
+        self.assertTrue(reply_names_target("ToTheLighthouse", ["lighthouse"]))
+        self.assertTrue(reply_names_target("Moonlight Sonata.", ["moonlight"]))
+        self.assertTrue(reply_names_target("Rabbits", ["rabbit", "hare"]))
+        self.assertFalse(reply_names_target("Carpet", ["carp"]))
+        self.assertFalse(reply_names_target("", ["carp"]))

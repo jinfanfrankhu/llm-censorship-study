@@ -40,6 +40,17 @@ def guess_is_correct(guess: str, target: str) -> bool:
     return g == t or _depluralize(g) == t or g == _depluralize(t)
 
 
+def reply_names_target(reply: str, accept: list[str]) -> bool:
+    """True if ANY word of a free-text reply is an accepted form of the target.
+
+    Decoder probes ask for one word but models answer "To the Lighthouse" or
+    "Moonlight Sonata"; scoring only the first word misses those (seen in the
+    round-2 gap check). Words are split on non-letters and on CamelCase.
+    """
+    words = re.findall(r"[A-Z]?[a-z]+|[A-Z]+(?![a-z])|[^\W\d_]+", reply or "")
+    return any(guess_is_correct(w, a) for w in words for a in accept)
+
+
 def _extract_json(text: str) -> dict | None:
     """Best-effort extraction of a single JSON object from model output."""
     if not text:

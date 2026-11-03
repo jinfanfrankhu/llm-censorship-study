@@ -30,7 +30,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 from .censor import TopicCensor
-from .game import guess_is_correct
+from .game import guess_is_correct, reply_names_target  # noqa: F401
 
 CENSORS = ["meta-llama/llama-3.2-3b-instruct", "meta-llama/llama-3.1-8b-instruct"]
 CONTROL_CENSOR = "openai/gpt-4o-mini"  # knowledgeable censor (monitor ~ decoder)
@@ -60,14 +60,13 @@ def load_dw(path: str) -> list[dict]:
 
 
 def correct(guess: str, accept: list[str]) -> bool:
-    g = (guess or "").strip().split()[0] if (guess or "").strip() else ""
-    return any(guess_is_correct(g, a) for a in accept)
+    return reply_names_target(guess, accept)
 
 
 def _ask(client, model, system, text):
     rec = client.chat(model, [{"role": "system", "content": system},
                               {"role": "user", "content": text}],
-                      run_index=0, temperature=0.0, max_tokens=8)
+                      run_index=0, temperature=0.0, max_tokens=12)
     return (rec.get("content") or "").strip()
 
 

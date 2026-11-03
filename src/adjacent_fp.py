@@ -66,18 +66,28 @@ CENSORS = ["meta-llama/llama-3.2-3b-instruct", "meta-llama/llama-3.1-8b-instruct
 
 
 def main():
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--probes", default="data/raw/dw_probes_Q.jsonl")
+    ap.add_argument("--stimuli", default="stimuli/dogwhistle_targets.csv")
+    ap.add_argument("--adjacent", default="", help="extra JSON {target: [msgs]}")
+    a = ap.parse_args()
     load_dotenv(".env")
     from .client import Client
     client = Client(budget_usd_max=1.0)
     accept = {r["target"]: [x for x in r["accept"].split("|") if x]
-              for r in csv.DictReader(open("stimuli/dogwhistle_targets.csv", encoding="utf-8"))}
-    probes = [json.loads(l) for l in open("data/raw/dw_probes_Q.jsonl", encoding="utf-8")]
+              for r in csv.DictReader(open(a.stimuli, encoding="utf-8"))}
+    adjacent = {t: m for t, m in ADJACENT.items() if t in accept}
+    if a.adjacent:
+        adjacent.update({t: m for t, m in json.load(open(a.adjacent, encoding="utf-8")).items()
+                         if t in accept})
+    probes = [json.loads(l) for l in open(a.probes, encoding="utf-8")]
     dws = {}
     for p in probes:
         if not p["out_recover"] and p["innocent"] and p["in_recover"]:
             dws[p["winning_msg"]] = p["target"]
     print(f"{len(dws)} distinct knowledge-gap dogwhistle messages; "
-          f"{sum(len(v) for v in ADJACENT.values())} adjacent innocents\n")
+          f"{sum(len(v) for v in adjacent.values())} adjacent innocents\n")
     print(f"{'censor':24} {'type':7} {'catch':>7} {'adjFP':>7}")
     rows = []
     for c in CENSORS:
@@ -86,14 +96,14 @@ def main():
                 kw = {"accept": accept[t]} if cls is DecodeTopicCensor else {}
                 return cls(t, client, c, "moderate", **kw).decide_block(m)
             catch = [blk(t, m) for m, t in dws.items()]
-            fp = [blk(t, m) for t, ms in ADJACENT.items() for m in ms]
+            fp = [blk(t, m) for t, ms in adjacent.items() for m in ms]
             rows.append((c, kind, catch, fp))
             print(f"{c.split('/')[-1][:24]:24} {kind:7} {sum(catch)}/{len(catch):<5} "
                   f"{sum(fp)}/{len(fp)}")
     print("\nper-target adjacent FP (decode censor, gpt-4o-mini):")
     c, _, _, fp = rows[-1]
     i = 0
-    for t, ms in ADJACENT.items():
+    for t, ms in adjacent.items():
         print(f"  {t:10} {sum(fp[i:i+len(ms)])}/{len(ms)}")
         i += len(ms)
     print(f"\nspend ${client.spend_usd:.4f}")

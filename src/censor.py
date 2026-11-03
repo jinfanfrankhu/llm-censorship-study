@@ -144,16 +144,15 @@ class DecodeTopicCensor(TopicCensor):
         self.last_decode: str | None = None
 
     def decode_hits(self, text: str) -> bool:
-        from .game import guess_is_correct  # local import: game imports censor lazily
+        from .game import reply_names_target  # local import: game imports censor lazily
         rec = self.client.chat(
             self.judge_model,
             [{"role": "system", "content": _DECODE_SYS}, {"role": "user", "content": text}],
-            run_index=0, temperature=0.0, max_tokens=8,
+            run_index=0, temperature=0.0, max_tokens=12,
         )
         g = (rec.get("content") or "").strip()
         self.last_decode = g
-        w = g.split()[0] if g else ""
-        return any(guess_is_correct(w, a) for a in self.accept)
+        return reply_names_target(g, self.accept)
 
     def decide_block(self, text: str) -> bool:
         if not text or not text.strip():
@@ -191,19 +190,18 @@ class TranscriptDecodeCensor(DecodeTopicCensor):
                 "references:\n" + shots + "\nAnswer with exactly one word")
 
     def decode_hits(self, text: str) -> bool:
-        from .game import guess_is_correct
+        from .game import reply_names_target
         msgs = self.history + [text]
         body = "\n".join(f"Message {i+1}: {m}" for i, m in enumerate(msgs))
         rec = self.client.chat(
             self.judge_model,
             [{"role": "system", "content": _DECODE_TX_SYS if self.history else _DECODE_SYS},
              {"role": "user", "content": body if self.history else text}],
-            run_index=0, temperature=0.0, max_tokens=8,
+            run_index=0, temperature=0.0, max_tokens=12,
         )
         g = (rec.get("content") or "").strip()
         self.last_decode = g
-        w = g.split()[0] if g else ""
-        return any(guess_is_correct(w, a) for a in self.accept)
+        return reply_names_target(g, self.accept)
 
     def apply(self, text: str) -> FilterResult:
         fr = super().apply(text)

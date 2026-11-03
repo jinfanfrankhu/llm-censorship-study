@@ -105,7 +105,7 @@ def has_meta_leak(text: str) -> bool:
     return bool(META_RE.search(text or ""))
 
 
-def _ask(client, model, system, text, max_tokens=8):
+def _ask(client, model, system, text, max_tokens=12):
     rec = client.chat(model, [{"role": "system", "content": system},
                               {"role": "user", "content": text}],
                       run_index=0, temperature=0.0, max_tokens=max_tokens)
