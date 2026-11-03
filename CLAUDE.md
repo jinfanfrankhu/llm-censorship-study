@@ -25,6 +25,21 @@ plain code. The deeper aim is a **mechanistic-interpretability** follow-up.
 - **Next planned experiment:** a **semantic / LLM censor** (`src/semantic_filter.py`)
   to replace the easy keyword filter — forces real evasion. See scratchpad TIER 1.
 
+## Dogwhistle-asymmetry branch (2026-11-03) — read `FINDINGS_dogwhistle.md`
+- **Referee v2:** receiver can ABSTAIN; a correct guess on a turn whose clue was
+  fully blocked is voided (`src/scoring.py`). Rescore old runs offline with
+  `python -m src.rescore` (strict = PI rule, lenient = void only if every clue
+  was blocked; quote results as that range).
+- **Censor ladder for knowledge gaps:** `filter.mode: topic_decode`
+  (`DecodeTopicCensor`) — blocks if the topic judge OR its own cold decode hits
+  the target. The plain TopicCensor on small models leaks for reasons unrelated
+  to knowledge (sloppy), so use topic_decode for any knowledge-gap claim.
+- Stimuli `stimuli/dogwhistle_targets.csv` (persona, handles, plain controls,
+  oracle). Prompts v8 / v8n / v8o (persona; outsider cue; oracle). Pipeline:
+  `src.gap_check` -> run `config/dwQ_*` -> `src.analyze_dogwhistle --by_model`
+  -> `src.adjacent_fp`. Judges NOT yet human-validated
+  (`ratings/dw_validation.csv`).
+
 ## Repo map
 - `src/filter.py` — keyword BlockingFilter + audit detector (leetspeak/spacing/
   substring/near_miss). `tests/test_filter.py` covers it.
@@ -85,5 +100,12 @@ Use the venv interpreter explicitly: **`.venv/Scripts/python.exe`** (Windows).
   a run finish on its own (don't kill) avoids the whole problem.
 - Interp phase needs model internals → run open models locally or via **NDIF**
   (hosts Llama-3.1-70B free for researchers); OpenRouter can't give activations.
+- Windows console is cp1252: set `PYTHONIOENCODING=utf-8` when printing model
+  output (Chinese characters crash prints). Heredoc'd Python that writes
+  `
+` escapes into source files can turn them into real newlines — use the
+  Edit tool for source edits containing escapes.
+- `--dry-run` WRITES mock trials into `data/raw/<run_name>.jsonl`; delete that
+  file before the real run or resume will skip those trials.
 - This repo runs an always-on "caveman" chat-style hook (terse replies). It only
   affects chat prose — code, commits, and docs stay normal prose.
