@@ -95,11 +95,14 @@ def run_trial(
     else:
         blocker = BlockingFilter(target, forbidden, redaction=redaction)
 
-    sender_sys = sender_system_prompt(target, forbidden, informed, version=prompt_version)
+    sender_sys = sender_system_prompt(target, forbidden, informed, version=prompt_version,
+                                      persona=item.get("persona", ""),
+                                      oracle=item.get("oracle", ""))
     sender_msgs = [{"role": "system", "content": sender_sys}]
     sender_msgs.append({"role": "user", "content": "Send your first clue."})
 
-    receiver_msgs = [{"role": "system", "content": receiver_system_prompt(version=prompt_version)}]
+    receiver_msgs = [{"role": "system", "content": receiver_system_prompt(version=prompt_version,
+                                                                         persona=item.get("persona", ""))}]
 
     turns: list[dict] = []
     errors: list[str] = []
@@ -159,7 +162,8 @@ def run_trial(
         # receiver note crosses the channel (filtered); guess does NOT
         note_fr = blocker.apply(receiver_note_raw) if receiver_note_raw else None
 
-        correct = bool(guess) and guess_is_correct(guess, target)
+        accept = item.get("accept") or [target]
+        correct = bool(guess) and any(guess_is_correct(guess, a) for a in accept)
         clue_blocked = clue_was_blocked(fr.filtered)
         # Filler-artifact guard: a correct guess on a turn whose clue was fully
         # blocked carried zero communicated information -> void it.
@@ -211,6 +215,10 @@ def run_trial(
         "forbidden": forbidden,
         "forbidden_level": forbidden_level,
         "freq_band": item.get("freq_band"),
+        "domain": item.get("domain"),
+        "handle_type": item.get("handle_type"),
+        "judge_model": judge_model,
+        "judge_strictness": judge_strictness,
         "zipf": item.get("zipf"),
         "model": model,              # sender model (kept for existing analysis)
         "sender_model": model,

@@ -37,6 +37,12 @@ def load_stimuli(path: str) -> list[dict]:
                     "freq_band": row.get("freq_band", "").strip(),
                     "zipf": float(row["zipf"]) if row.get("zipf") else None,
                     "forbidden": forbidden,
+                    # dogwhistle stimuli extras (absent in targets.csv)
+                    "accept": [a.strip() for a in (row.get("accept") or "").split("|") if a.strip()] or None,
+                    "persona": (row.get("persona") or "").strip(),
+                    "oracle": (row.get("oracle") or "").strip(),
+                    "domain": (row.get("domain") or "").strip() or None,
+                    "handle_type": (row.get("handle_type") or "").strip() or None,
                 }
             )
     return items
@@ -60,7 +66,7 @@ def existing_keys(out_path: Path) -> set[tuple]:
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--config", required=True)
-    ap.add_argument("--stimuli", default="stimuli/targets.csv")
+    ap.add_argument("--stimuli", default=None, help="default: config 'stimuli' or stimuli/targets.csv")
     ap.add_argument("--dry-run", action="store_true", help="use the mock model (no API cost)")
     ap.add_argument("--limit", type=int, default=None, help="cap number of NEW trials this run")
     ap.add_argument("--workers", type=int, default=1,
@@ -69,7 +75,7 @@ def main():
     args = ap.parse_args()
 
     cfg = load_config(args.config)
-    items = load_stimuli(args.stimuli)
+    items = load_stimuli(args.stimuli or cfg.get("stimuli", "stimuli/targets.csv"))
 
     run_name = cfg["run_name"]
     models = cfg.get("models", [])
