@@ -96,12 +96,19 @@ def run_trial(
         from .censor import DecodeTopicCensor
         blocker = DecodeTopicCensor(target, client, judge_model, strictness=judge_strictness,
                                     accept=item.get("accept") or [target])
+    elif filter_mode in ("transcript_decode", "transcript_decode_ex"):
+        from .censor import TranscriptDecodeCensor
+        ex = item.get("censor_examples") if filter_mode == "transcript_decode_ex" else None
+        blocker = TranscriptDecodeCensor(target, client, judge_model, strictness=judge_strictness,
+                                         accept=item.get("accept") or [target], examples=ex)
     else:
         blocker = BlockingFilter(target, forbidden, redaction=redaction)
 
     sender_sys = sender_system_prompt(target, forbidden, informed, version=prompt_version,
                                       persona=item.get("persona", ""),
                                       oracle=item.get("oracle", ""))
+    if item.get("sender_notes"):  # arms race: sender's memory of earlier rounds
+        sender_sys += "\n\n" + item["sender_notes"]
     sender_msgs = [{"role": "system", "content": sender_sys}]
     sender_msgs.append({"role": "user", "content": "Send your first clue."})
 
