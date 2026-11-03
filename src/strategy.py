@@ -37,6 +37,36 @@ from .filter import audit_flags
 
 LABELS = ("surface", "semantic", "meta")
 
+# Objective surface-trick markers. The LLM classifier systematically MISSES these
+# when a form-trick (rhyme, letter manipulation, fill-in-the-blank) is wrapped in
+# an otherwise-descriptive sentence ("...rhymes with fog and is a popular pet") --
+# it picks "semantic" because description is present. But deploying a form-trick
+# AT ALL is the folk-theory reflex we are measuring (and it's what a semantic
+# censor sees through), so a marker forces ``surface`` regardless of the wrapper.
+# Mirrors the leetspeak audit anchor. Verified by hand against the lenient sweep.
+_SURFACE_MARKERS = re.compile(
+    r"""
+    rhyme                                   # "rhymes with", "rhyming"
+    | sounds?\s+like
+    | starts?\s+with\s+(?:the\s+)?(?:letter|['"a-z])   # "starts with the letter h"
+    | ends?\s+with\s+(?:the\s+)?(?:letter|['"a-z])
+    | (?:first|last|second|third|final)\s+letter
+    | \b(?:one|two|three|four|five|\d+)\s+letters?\b
+    | replace\s+the\b | remove\s+(?:the|a)\b | add\s+(?:a|the)\s+letter
+    | \bspell(?:s|ed|ing)?\b
+    | fill\s+in\s+(?:the\s+)?(?:blank|vowel)
+    | \bacronym\b | stands?\s+for\b
+    | word\s*play | word\s+puzzle | \banagram\b
+    | _\s*_                                 # fill-in-the-blank: "____", "_ _ _"
+    | \bH\s?2\s?O\b                         # chemical/number substitution
+    """,
+    re.IGNORECASE | re.VERBOSE,
+)
+
+
+def has_surface_marker(text: str) -> bool:
+    return bool(_SURFACE_MARKERS.search(text or ""))
+
 _SYSTEM = (
     "You classify how a clue-giver in a word-guessing game is trying to convey a "
     "SECRET WORD to a partner, when a censor is blocking on-topic messages. Read "
@@ -112,8 +142,8 @@ def main():
         for run_name in args.runs:
             for r, t, msg in iter_sender_turns(run_name):
                 flags = t.get("audit_flags", [])
-                if has_clean_surface_flag(flags):
-                    label = "surface"
+                if has_clean_surface_flag(flags) or has_surface_marker(msg):
+                    label = "surface"  # objective anchor overrides the LLM
                 else:
                     label = classify(client, args.judge, msg, r["target"])
                 rec = {
