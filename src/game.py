@@ -92,6 +92,10 @@ def run_trial(
     elif filter_mode == "topic":
         from .censor import TopicCensor
         blocker = TopicCensor(target, client, judge_model, strictness=judge_strictness)
+    elif filter_mode == "topic_decode":
+        from .censor import DecodeTopicCensor
+        blocker = DecodeTopicCensor(target, client, judge_model, strictness=judge_strictness,
+                                    accept=item.get("accept") or [target])
     else:
         blocker = BlockingFilter(target, forbidden, redaction=redaction)
 

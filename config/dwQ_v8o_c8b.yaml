@@ -1,0 +1,26 @@
+# Exp Q: same as Exp P but DECODE-censor (blocks if topic judge says BLOCK or its own cold decode names the target) -> survivors are knowledge-bounded, not sloppy leaks. 3 runs/item. In-group sender+receiver (same model)
+# vs a knowledge-gap topic censor (meta-llama/llama-3.1-8b-instruct). Prompt v8o:
+#   v5 = aware, no persona (baseline) | v8n = persona, no outsider cue
+#   v8 = persona + "censor is an outsider" | v8o = v8 + oracle handle (ceiling)
+run_name: dwQ_v8o_c8b
+stimuli: stimuli/dogwhistle_targets.csv
+prompt_version: v8o
+models:
+  - "meta-llama/llama-3.3-70b-instruct"
+  - "deepseek/deepseek-chat"
+pairing: same_model
+conditions:
+  informed: [true]
+filter:
+  mode: topic_decode
+  judge_model: "meta-llama/llama-3.1-8b-instruct"
+  strictness: moderate
+  redaction: per_char
+  forbidden_levels: [0]
+max_turns: 6
+runs_per_item: 3
+sampling:
+  temperature: 0.7
+  max_tokens: 300
+seed_base: 1234
+budget_usd_max: 3.00
