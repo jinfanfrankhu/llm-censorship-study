@@ -13,6 +13,9 @@ import re
 from .filter import BlockingFilter, audit_flags
 from .prompts import DEFAULT_PROMPT_VERSION as PROMPT_VERSION
 from .prompts import receiver_system_prompt, sender_system_prompt
+from .scoring import clue_was_blocked
+
+ABSTAIN_TOKENS = {"", "abstain", "pass", "none", "unknown", "insufficient", "?", "null"}
 
 
 # --------------------------------------------------------------------------- #
@@ -101,6 +104,7 @@ def run_trial(
     turns: list[dict] = []
     errors: list[str] = []
     success = False
+    success_raw = False
     turns_to_success = None
     usage_total = {"prompt_tokens": 0, "completion_tokens": 0, "cost_usd": 0.0}
 
@@ -132,7 +136,7 @@ def run_trial(
         if parsed is None:
             receiver_msgs.append({"role": "assistant", "content": receiver_raw})
             receiver_msgs.append(
-                {"role": "user", "content": 'Please respond with valid JSON only: {"guess": "<one word>", "message": "<optional>"}.'}
+                {"role": "user", "content": 'Please respond with valid JSON only: {"guess": "<one word, or ABSTAIN>", "message": "<optional>"}.'}
             )
             rrec2 = client.chat(receiver_model, receiver_msgs, run_index=run_index, **sampling)
             _tally(rrec2)
@@ -144,8 +148,11 @@ def run_trial(
             guess = None
             receiver_note_raw = ""
         else:
-            guess = str(parsed.get("guess", "")).strip()
+            guess = str(parsed.get("guess", "") or "").strip()
             receiver_note_raw = str(parsed.get("message", "") or "")
+        abstained = parsed is not None and (guess or "").lower().strip(" .!\"'") in ABSTAIN_TOKENS
+        if abstained:
+            guess = None
 
         receiver_msgs.append({"role": "assistant", "content": receiver_raw})
 
@@ -153,6 +160,10 @@ def run_trial(
         note_fr = blocker.apply(receiver_note_raw) if receiver_note_raw else None
 
         correct = bool(guess) and guess_is_correct(guess, target)
+        clue_blocked = clue_was_blocked(fr.filtered)
+        # Filler-artifact guard: a correct guess on a turn whose clue was fully
+        # blocked carried zero communicated information -> void it.
+        voided = correct and clue_blocked
 
         turns.append(
             {
@@ -166,18 +177,27 @@ def run_trial(
                 "receiver_message_raw": receiver_note_raw,
                 "receiver_message_filtered": note_fr.filtered if note_fr else "",
                 "correct": correct,
+                "abstained": abstained,
+                "clue_blocked": clue_blocked,
+                "voided_win": voided,
             }
         )
 
         if correct:
-            success = True
-            turns_to_success = turn
+            # The target word has been said either way, so the trial ends; a
+            # voided (blocked-clue) win is scored as a failure.
+            success_raw = True
+            if not voided:
+                success = True
+                turns_to_success = turn
             break
 
         # 4. Sender feedback for next turn
         feedback = f"Your message was delivered as: {fr.filtered}"
         if guess:
             feedback += f'\nIncorrect guess: "{guess}".'
+        elif abstained:
+            feedback += "\nYour partner did not have enough information to guess."
         else:
             feedback += "\nYour partner's reply could not be read."
         if note_fr and note_fr.filtered.strip():
@@ -201,7 +221,9 @@ def run_trial(
         "redaction": redaction,
         "filter_mode": filter_mode,
         "turns": turns,
-        "success": success,
+        "success": success,              # honest: blocked-clue wins voided
+        "success_raw": success_raw,      # original referee (counts filler wins)
+        "referee_version": 2,
         "turns_to_success": turns_to_success,
         "usage": {
             "prompt_tokens": usage_total["prompt_tokens"],

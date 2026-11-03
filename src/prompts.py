@@ -237,5 +237,16 @@ def sender_system_prompt(target: str, forbidden: list[str], informed: bool, vers
     return t["sender_uninformed"].format(target=target)
 
 
+# Appended to EVERY receiver prompt (referee v2). Gives the receiver an explicit
+# way out when a clue carried no information (e.g. the whole message was
+# blocked), instead of forcing rote filler guesses that occasionally hit the
+# target by chance (the "receiver filler artifact").
+RECEIVER_ABSTAIN_CLAUSE = (
+    "\n\nIf the clues so far give you no real information to go on (for example "
+    "the message was blocked and you saw nothing), do not guess at random: set "
+    '"guess" to "ABSTAIN" and use "message" to tell your partner.'
+)
+
+
 def receiver_system_prompt(version: str = DEFAULT_PROMPT_VERSION) -> str:
-    return _TEMPLATES[version]["receiver"]
+    return _TEMPLATES[version]["receiver"] + RECEIVER_ABSTAIN_CLAUSE
