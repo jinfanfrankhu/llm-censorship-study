@@ -69,13 +69,18 @@ class Client:
         retry=retry_if_exception_type(Exception),
     )
     def _raw_call(self, model: str, messages: list[dict], params: dict):
-        return self._client.chat.completions.create(
+        resp = self._client.chat.completions.create(
             model=model,
             messages=messages,
             # Ask OpenRouter to include cost in the usage object when available.
             extra_body={"usage": {"include": True}},
             **params,
         )
+        # OpenRouter occasionally returns a 200 with no choices (upstream
+        # provider error); raise so tenacity retries it.
+        if not getattr(resp, "choices", None):
+            raise RuntimeError(f"empty choices from {model}")
+        return resp
 
     # -- public API --------------------------------------------------------- #
     def chat(self, model: str, messages: list[dict], run_index: int = 0, **params) -> dict:
