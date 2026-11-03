@@ -85,7 +85,10 @@ META_RE = re.compile(
     r"think (of|about|back)|consider|recall|remember (the|our|that|how)|"
     r"i'?m thinking of|try (again|a different)|attempt\w*|let me|let's try|"
     r"approach|previous message|snag|getting closer|not exactly|close, but|"
-    r"you know the rest|what (word|creature|animal|stone|is it))\b", re.IGNORECASE)
+    r"you know the rest|what (word|creature|animal|stone|is it)|"
+    # v3 (v9 transcripts): disguised references to blocked messages
+    r"getting through|technical (issue|difficult)\w*|connection (is|seems)|"
+    r"spotty|didn'?t come through|lost (in|again))\b", re.IGNORECASE)
 
 
 def has_meta_leak(text: str) -> bool:
