@@ -102,9 +102,8 @@ Use the venv interpreter explicitly: **`.venv/Scripts/python.exe`** (Windows).
   (hosts Llama-3.1-70B free for researchers); OpenRouter can't give activations.
 - Windows console is cp1252: set `PYTHONIOENCODING=utf-8` when printing model
   output (Chinese characters crash prints). Heredoc'd Python that writes
-  `
-` escapes into source files can turn them into real newlines — use the
-  Edit tool for source edits containing escapes.
+  backslash-n escapes into source files can turn them into real newlines — use
+  the Edit tool for source edits containing escapes.
 - `--dry-run` WRITES mock trials into `data/raw/<run_name>.jsonl`; delete that
   file before the real run or resume will skip those trials.
 - This repo runs an always-on "caveman" chat-style hook (terse replies). It only
