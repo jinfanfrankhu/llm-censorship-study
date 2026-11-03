@@ -53,14 +53,14 @@ Use the venv interpreter explicitly: **`.venv/Scripts/python.exe`** (Windows).
 .venv/Scripts/python.exe -m pytest tests/ -q                 # tests (21)
 .venv/Scripts/python.exe -m src.run --config config/X.yaml --dry-run --limit 4   # plumbing, no cost
 .venv/Scripts/python.exe -m src.run --config config/X.yaml   # real run (needs .env OPENROUTER_API_KEY)
+.venv/Scripts/python.exe -m src.run --config config/X.yaml --workers 10   # parallel trials (I/O-bound, ~10x)
 .venv/Scripts/python.exe -m src.analyze --run_name X
 .venv/Scripts/python.exe -m src.report --runs A B            # compare runs
 ```
 
 ## Conventions
 - **Git hygiene:** work on a branch (current experiment branch: `pilot-experiments`),
-  atomic commits, `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>`
-  trailer. Never commit `data/`, `.env`, `LIT-REVIEW.md`, `scratchpad/`.
+  atomic commits. Never commit `data/`, `.env`, `LIT-REVIEW.md`, `scratchpad/`.
 - Each experiment gets its own `run_name`/config. Runs are resumable and cached,
   so re-running analysis never re-calls the API.
 - Report results honestly; this is research. Read transcripts before trusting
@@ -73,6 +73,16 @@ Use the venv interpreter explicitly: **`.venv/Scripts/python.exe`** (Windows).
 - `python-dotenv`: call `load_dotenv(".env")` explicitly (bare `find_dotenv`
   fails when run via heredoc).
 - OpenRouter has transient 500s; the client's retries ride through them.
+- **Killing a background run on Windows orphans the python child.** Stopping the
+  bash wrapper (TaskStop / Ctrl-C) does NOT cascade to the `python -m src.run`
+  child — it keeps running and keeps writing. If you relaunch, the orphan and the
+  new run write the SAME config concurrently, producing duplicate rows (seen:
+  moderate/strict at ~780 lines vs the 400-cell max). Always kill python by PID
+  after stopping a run (`Get-Process python | Stop-Process -Force`), verify zero
+  remain, THEN relaunch. Writes are per-line-flushed so no truncation, but dedupe
+  defensively by trial key `(item_id, model, receiver_model, informed,
+  forbidden_level, run_index)` — keep first occurrence — before analysis. Letting
+  a run finish on its own (don't kill) avoids the whole problem.
 - Interp phase needs model internals → run open models locally or via **NDIF**
   (hosts Llama-3.1-70B free for researchers); OpenRouter can't give activations.
 - This repo runs an always-on "caveman" chat-style hook (terse replies). It only
