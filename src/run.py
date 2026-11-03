@@ -63,6 +63,9 @@ def main():
     ap.add_argument("--stimuli", default="stimuli/targets.csv")
     ap.add_argument("--dry-run", action="store_true", help="use the mock model (no API cost)")
     ap.add_argument("--limit", type=int, default=None, help="cap number of NEW trials this run")
+    ap.add_argument("--workers", type=int, default=1,
+                    help="parallel trials across the grid (I/O-bound; ~10 is safe). "
+                         "Turns within a trial stay sequential; writes stay single-threaded.")
     args = ap.parse_args()
 
     cfg = load_config(args.config)
@@ -117,42 +120,67 @@ def main():
 
     print(f"{len(grid)} trials total | {len(done)} already done | running {len(todo)} now")
 
+    def _do(g):
+        """Run one trial. Safe to call from a worker thread: run_trial only reads
+        shared config and calls client.chat (per-key cache files are distinct; the
+        OpenAI/httpx client pools connections thread-safely). No shared mutation."""
+        item, sender, receiver, informed, level, run_index = g
+        record = run_trial(
+            client,
+            item=item,
+            model=sender,
+            receiver_model=receiver,
+            informed=informed,
+            forbidden_level=level,
+            run_index=run_index,
+            max_turns=max_turns,
+            redaction=redaction,
+            sampling=sampling,
+            seed=seed_base + run_index,
+            prompt_version=prompt_version,
+            filter_mode=filter_mode,
+            judge_model=judge_model,
+            judge_strictness=judge_strictness,
+        )
+        record["run_name"] = run_name
+        return record
+
+    def _label(g):
+        return (f"{g[0]['item_id']} {g[1]}>>{g[2]} inf={g[3]} lvl={g[4]} run={g[5]}")
+
     written = 0
     failed = 0
+    # Writes happen ONLY in the main thread (single writer) so the jsonl is never
+    # interleaved; trials execute in worker threads when --workers > 1.
     with open(out_path, "a", encoding="utf-8") as out:
-        for item, sender, receiver, informed, level, run_index in tqdm(todo, desc=run_name):
-            try:
-                record = run_trial(
-                    client,
-                    item=item,
-                    model=sender,
-                    receiver_model=receiver,
-                    informed=informed,
-                    forbidden_level=level,
-                    run_index=run_index,
-                    max_turns=max_turns,
-                    redaction=redaction,
-                    sampling=sampling,
-                    seed=seed_base + run_index,
-                    prompt_version=prompt_version,
-                    filter_mode=filter_mode,
-                    judge_model=judge_model,
-                    judge_strictness=judge_strictness,
-                )
-            except BudgetExceeded as e:
-                print(f"\n[budget] stopped: {e}. {written} trials written; rerun to resume.")
-                return
-            except Exception as e:
-                # Keep an unattended run alive: skip this trial (it stays absent
-                # from the output, so a later rerun retries it) and continue.
-                failed += 1
-                tqdm.write(f"[error] {item['item_id']} {sender}>>{receiver} inf={informed} "
-                           f"lvl={level} run={run_index}: {type(e).__name__}: {str(e)[:120]}")
-                continue
-            record["run_name"] = run_name
+        def _emit(record):
+            nonlocal written
             out.write(json.dumps(record, ensure_ascii=False) + "\n")
             out.flush()
             written += 1
+
+        if args.workers <= 1:
+            for g in tqdm(todo, desc=run_name):
+                try:
+                    _emit(_do(g))
+                except BudgetExceeded as e:
+                    print(f"\n[budget] stopped: {e}. {written} trials written; rerun to resume.")
+                    break
+                except Exception as e:
+                    failed += 1
+                    tqdm.write(f"[error] {_label(g)}: {type(e).__name__}: {str(e)[:120]}")
+        else:
+            from concurrent.futures import ThreadPoolExecutor, as_completed
+            with ThreadPoolExecutor(max_workers=args.workers) as ex:
+                futs = {ex.submit(_do, g): g for g in todo}
+                for fut in tqdm(as_completed(futs), total=len(futs), desc=run_name):
+                    try:
+                        _emit(fut.result())
+                    except BudgetExceeded as e:
+                        tqdm.write(f"[budget] {e} (skipping remaining; rerun to resume)")
+                    except Exception as e:
+                        failed += 1
+                        tqdm.write(f"[error] {_label(futs[fut])}: {type(e).__name__}: {str(e)[:120]}")
 
     spend = getattr(client, "spend_usd", 0.0)
     print(f"done. wrote {written} trials ({failed} failed/skipped). approx spend ${spend:.4f}")
