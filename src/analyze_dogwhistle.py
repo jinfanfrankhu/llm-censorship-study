@@ -98,7 +98,9 @@ META_RE = re.compile(
     r"you know the rest|what (word|creature|animal|stone|is it)|"
     # v3 (v9 transcripts): disguised references to blocked messages
     r"getting through|technical (issue|difficult)\w*|connection (is|seems)|"
-    r"spotty|didn'?t come through|lost (in|again))\b", re.IGNORECASE)
+    r"spotty|didn'?t come through|lost (in|again)|"
+    # v4 (Exp R transcripts): repair talk about the exchange itself
+    r"communication (method|issue)\w*|mix-up|wasn'?t suggesting)\b", re.IGNORECASE)
 
 
 def has_meta_leak(text: str) -> bool:
