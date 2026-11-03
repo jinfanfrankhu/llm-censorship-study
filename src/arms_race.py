@@ -119,6 +119,16 @@ def main():
 
         def _do(j):
             item, s, k = j
+            try:
+                return _trial(item, s, k)
+            except Exception as e:  # transient API failure: skip, resume later
+                print(f"  trial failed ({it_id(item)}, {s}, {k}): {e!r}", flush=True)
+                return None
+
+        def it_id(item):
+            return item["item_id"]
+
+        def _trial(item, s, k):
             rec = run_trial(client, item=item, model=s, receiver_model=s, informed=True,
                             forbidden_level=0, run_index=k, max_turns=a.max_turns,
                             redaction="per_char", sampling=SAMPLING, seed=1234 + k,
@@ -131,6 +141,8 @@ def main():
 
         with ThreadPoolExecutor(max_workers=a.workers) as ex, open(out, "a", encoding="utf-8") as f:
             for rec in ex.map(_do, jobs):
+                if rec is None:
+                    continue
                 f.write(json.dumps(rec, ensure_ascii=False) + "\n")
                 f.flush()
                 done.append(rec)
