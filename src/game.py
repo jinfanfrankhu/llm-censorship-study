@@ -209,6 +209,9 @@ def run_trial(
                 "abstained": abstained,
                 "clue_blocked": clue_blocked,
                 "voided_win": voided,
+                # private chain of thought from reasoning senders (None otherwise);
+                # never shown to the censor or the receiver
+                "sender_reasoning": srec.get("reasoning"),
             }
         )
 

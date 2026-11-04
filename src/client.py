@@ -69,11 +69,17 @@ class Client:
         retry=retry_if_exception_type(Exception),
     )
     def _raw_call(self, model: str, messages: list[dict], params: dict):
+        params = dict(params)
+        # Ask OpenRouter to include cost in the usage object when available.
+        extra_body = {"usage": {"include": True}}
+        # OpenRouter reasoning control (e.g. {"effort": "medium"}) is not an
+        # OpenAI SDK kwarg; pass it through the request body.
+        if "reasoning" in params:
+            extra_body["reasoning"] = params.pop("reasoning")
         resp = self._client.chat.completions.create(
             model=model,
             messages=messages,
-            # Ask OpenRouter to include cost in the usage object when available.
-            extra_body={"usage": {"include": True}},
+            extra_body=extra_body,
             **params,
         )
         # OpenRouter occasionally returns a 200 with no choices (upstream
@@ -117,6 +123,9 @@ class Client:
             "run_index": run_index,
             "content": content,
             "finish_reason": getattr(choice, "finish_reason", None),
+            # reasoning models: OpenRouter returns the trace in message.reasoning
+            "reasoning": getattr(choice.message, "reasoning", None)
+            or (getattr(choice.message, "model_extra", None) or {}).get("reasoning"),
             "usage": {
                 "prompt_tokens": prompt_tokens,
                 "completion_tokens": completion_tokens,
