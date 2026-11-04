@@ -44,6 +44,20 @@ ACKTYPE_SYS = (
     "NONE - B says they do not understand or asks for more")
 
 
+def rescore(r, accept):
+    """Recompute receiver_knows / first_known_turn / outcome with the current
+    scorer (runs before the e-final plural fix scored "pancakes" as wrong)."""
+    first = None
+    for t in r["turns"]:
+        priv = str(t.get("private_answer") or "").strip()
+        t["receiver_knows"] = priv.upper() != "ABSTAIN" and reply_names_target(priv, accept)
+        if t["receiver_knows"] and first is None:
+            first = t["turn"]
+    r["first_known_turn"] = first
+    if r["outcome"] != "miss":
+        r["outcome"] = "true_ack" if r["turns"][-1]["receiver_knows"] else "false_ack"
+
+
 def two_way(turns, upto):
     lines = []
     for t in turns[:upto]:
@@ -84,6 +98,7 @@ def main():
             k = (r["item_id"], r["model"], r["run_index"])
             if k not in seen:
                 seen.add(k)
+                rescore(r, items[r["item_id"]]["accept"])
                 recs.append(r)
         c = Counter()
         lags, hind = [], []

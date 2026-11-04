@@ -37,7 +37,10 @@ def guess_is_correct(guess: str, target: str) -> bool:
     g, t = _normalize(guess), _normalize(target)
     if not g:
         return False
-    return g == t or _depluralize(g) == t or g == _depluralize(t)
+    if g == t or _depluralize(g) == t or g == _depluralize(t):
+        return True
+    # "-es" stripping breaks e-final words ("pancakes" -> "pancak"); also try "-s".
+    return g.endswith("s") and len(g) > 2 and g[:-1] == t
 
 
 def reply_names_target(reply: str, accept: list[str]) -> bool:
