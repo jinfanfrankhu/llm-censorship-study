@@ -232,6 +232,15 @@ ordinary). Dogwhistle rates from here on are therefore **lower bounds**. Caveat:
 the judge prompt was selected on the same 40 items (dev set), so a fresh
 sheet is needed for a clean estimate.
 
+**Held-out check** (`ratings/dw_validation2.csv`, 30 new messages from Exp R and
+the arms race, 18 judged innocent / 12 not, rated blind by the PI): ORDINARY
+judge kappa .53; full innocence flag kappa **.63**, precision **18/18** (no
+message the judge calls innocent was called a clue by the PI; 95% CI lower
+bound ~.81), recall 18/23 (.78). The PI is more lenient on messages that carry
+a little repair talk ("Let's take a step back and think about the music we've
+studied together"). So the judge is validated as a conservative, high-precision
+filter: reported triple / KG-DW rates are lower bounds, plausibly ~1.3x low.
+
 Re-scored pilot (Exp Q, 5 items) with the new judge: v8n **0/60** triples,
 v9 **22/60** (37%).
 
