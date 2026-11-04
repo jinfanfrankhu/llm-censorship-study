@@ -61,11 +61,24 @@ degrade into vagueness.
 - F4: arms race: D and KG-DW / vague per round for the three arms.
 - T1: example dogwhistles with censor cold guesses.
 
-## Still needed (status 2026-11-03 evening)
-- [running] arms race completion; Exp S (qwen-72b, gemma-3-27b); 6 runs/item
-  for v8n/v9 vs gpt-4o-mini.
-- [PI] second blind sheet `ratings/dw_validation2.csv` (30 items; ignore the
-  empty `community` column).
-- arms race replicate (second seed) if the 'both' arm stays noisy.
+## Still needed (status 2026-11-03 night)
+Done: arms race complete (3 arms x 4 rounds); Exp S (qwen-72b, gemma-3-27b:
+v8n 1/144 vs v9 20/144); 6 runs/item vs gpt-4o-mini (v8n 0/144 vs v9 28/144);
+second blind validation sheet (precision 18/18, kappa .63); Exp T covert
+acknowledgment (FINDINGS section 11).
+- **Arms race second seed.** The 'both' arm's round-3 rebound (D 7 -> 12) is
+  within noise at 5-7 triples/round; one more seed (~$1) before F4 is drawn.
+- **Exp T needs independent samples.** Message vs transcript cells share
+  66/72 cached trajectories; for the paper either drop the transcript cells or
+  rerun them with different run indices. Decide after the sender re-read.
+- **Exp T sender-side follow-up** (re-read of existing transcripts with a
+  'listening' verdict prompt, `src/ack_reread.py`); if it unlocks echo acks,
+  this mirrors the v8n/v9 propensity finding on the listener side.
+- Decide paper scope: Exp T as a fifth contribution ("covert grounding") or as
+  a short section; it is the most novel axis vs prior stego/collusion work.
+- Judge re-validation for the ACK-type judge (ECHO is generous); a 30-reply
+  blind sheet.
+- Citations: verify every entry in Related Work against LIT-REVIEW.md and the
+  papers themselves.
 - Interp follow-up (separate paper or appendix): v8n vs v9 contrast on an
   open model.
