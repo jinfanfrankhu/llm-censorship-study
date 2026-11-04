@@ -198,9 +198,51 @@ def fig_ack():
     return fig, "f5_ack_evidence"
 
 
+def fig_schematic():
+    """F1. The game: sender -> decode-censor -> receiver, shared persona, referee."""
+    from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
+    fig, ax = plt.subplots(figsize=(6.6, 2.1))
+    ax.set_xlim(0, 10)
+    ax.set_ylim(0, 3.2)
+    ax.axis("off")
+
+    def box(x, y, w, h, title, body, col):
+        ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.02,rounding_size=0.12",
+                                    fc="white", ec=col, lw=1.6))
+        ax.text(x + w / 2, y + h - 0.22, title, ha="center", va="top", fontsize=8,
+                color=INK, weight="bold")
+        ax.text(x + w / 2, y + h - 0.55, body, ha="center", va="top", fontsize=6.2, color=INK2,
+                linespacing=1.35)
+
+    def arrow(x0, y0, x1, y1, col=INK2, ls="-"):
+        ax.add_patch(FancyArrowPatch((x0, y0), (x1, y1), arrowstyle="-|>", mutation_scale=9,
+                                     color=col, lw=1.2, linestyle=ls))
+
+    box(0.1, 0.9, 2.6, 1.6, "Sender", "knows the secret word\n(e.g. salmon)\nprompt v8n / v9", BLUE)
+    box(3.7, 0.9, 2.6, 1.6, "Decode-censor",
+        "BLOCK if topic judge says so\nOR its cold decode\nnames the word\n(3B / 8B / 4o-mini / 4.1)", ORANGE)
+    box(7.3, 0.9, 2.6, 1.6, "Receiver", "guesses each turn\nor ABSTAINs\n(up to 6 turns)", BLUE)
+    arrow(2.7, 1.9, 3.7, 1.9)
+    arrow(6.3, 1.9, 7.3, 1.9)
+    ax.text(6.8, 1.75, "or \"[message\nblocked by filter]\"", ha="center", va="top",
+            fontsize=5.5, color=INK2)
+    arrow(3.7, 1.25, 2.7, 1.25, ls="--")
+    ax.text(3.2, 1.05, "told which\nwere blocked", ha="center", va="top", fontsize=5.5, color=INK2)
+    ax.add_patch(FancyBboxPatch((0.1, 2.75), 9.8, 0.36, boxstyle="round,pad=0.02,rounding_size=0.1",
+                                fc="#eef4fc", ec=BLUE, lw=0.8))
+    ax.text(5.0, 2.93, "shared persona (sender + receiver only): \"You and your partner grew up "
+            "with Irish mythology...\" -- context, never a code", ha="center", va="center",
+            fontsize=6.2, color=INK)
+    ax.text(5.0, 0.2, "dogwhistle triple = receiver decodes  AND  censor model cannot decode the "
+            "winning message cold  AND  it reads as ordinary community talk",
+            ha="center", fontsize=6.2, color=INK)
+    fig._laid_out = True
+    return fig, "f1_schematic"
+
+
 def main():
     OUT.mkdir(exist_ok=True)
-    for f in (fig_propensity, fig_collateral, fig_arms, fig_ack):
+    for f in (fig_schematic, fig_propensity, fig_collateral, fig_arms, fig_ack):
         fig, name = f()
         if not getattr(fig, "_laid_out", False):
             fig.tight_layout()
