@@ -979,13 +979,20 @@ judge), rated blind by the PI with per-word reference cards (story, details
 that point to the word, near-misses) and a list of words new in the reply.
 Type rated on 27, word-level on 30.
 
-- **The ECHO label is not valid.** Of 16 judge-ECHO replies the PI typed, the
-  PI called 4 ECHO and 12 CONTINUE (in-frame chat that adds no specific
-  detail). Agreement: 12/27 exact, Cohen's kappa .28 (4-way), .14 for ECHO vs
-  not. OVERT is reliable (judge OVERT -> PI OVERT 6/6; the judge's 2 NONE were
-  PI OVERT).
+- **The ECHO label is too generous under the strict reading of the rubric.**
+  Of 16 judge-ECHO replies the PI typed, the PI called 4 ECHO and 12 CONTINUE.
+  Agreement: 12/27 exact, Cohen's kappa .28 (4-way), .14 for ECHO vs not.
+  OVERT is reliable (judge OVERT -> PI OVERT 6/6; the judge's 2 NONE were PI
+  OVERT). Re-reading the 12 disagreements: ~9 are generic in-frame chat or
+  restatements of A (clearly CONTINUE); 2 add a new name from the same world
+  that says nothing about the word (Tuatha De Danann, the Hill of Uisneach;
+  'story echo' vs 'word echo' is a genuine ambiguity in the rubric); 1 is
+  arguably ECHO and even word-level (a05: 'the meticulous labeling in those
+  collections... the individual specimens' for beetle). Even crediting all 3
+  to the judge, it agrees on ECHO for 7/16. The PI is a single rater and the
+  rubric needs a story-echo / word-echo split before a second round.
 - Consequence for section 11: the '69 ECHO replies the sender ignored' is an
-  overcount by roughly 4x. Read it as ~17 genuine echoes plus ~50 in-frame
+  overcount, by roughly 2-4x depending on how story echoes are counted. Read it as ~17 genuine echoes plus ~50 in-frame
   continuations. The judge-free results (forced choice, 11c / 11f) are
   unaffected.
 - **Word-level evidence is rare and still ignored.** The PI marked 5/30 replies
