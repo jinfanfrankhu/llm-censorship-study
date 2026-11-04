@@ -81,7 +81,7 @@ def main():
     ap.add_argument("--stimuli", default="stimuli/dogwhistle_targets_R.csv")
     ap.add_argument("--name", default="expT")
     ap.add_argument("--budget", type=float, default=0.5)
-    ap.add_argument("--mode", choices=["full", "reply_only", "no_reply"], default="full",
+    ap.add_argument("--mode", choices=["full", "reply_only", "no_reply", "nothing"], default="full",
                     help="full: conversation + reply; reply_only: the reply alone "
                          "(isolates its evidence); no_reply: conversation only (prior)")
     a = ap.parse_args()
@@ -122,6 +122,8 @@ def main():
                     user = f"{conv}\n\nPARTNER'S REPLY: {raw}"
                 elif a.mode == "reply_only":
                     user = f"(conversation not shown)\n\nPARTNER'S REPLY: {raw}"
+                elif a.mode == "nothing":
+                    user = "(conversation not shown)\n\nPARTNER'S REPLY: (not shown)"
                 else:
                     user = f"{conv}\n\nPARTNER'S REPLY: (not shown)"
                 user += f"\n\nCandidates:\n{opts}"

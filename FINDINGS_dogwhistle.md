@@ -874,3 +874,24 @@ qwen-2.5-72b, gpt-4.1-mini, 3 runs (96 trials). `data/expTU_analysis.txt`,
   beyond the conversation; blocked ones do". The stronger claim "delivered
   acknowledgments are indistinguishable from a wrong receiver's" holds on the
   original items and, excluding one weak neighbour set, on the held-out items.
+
+### 11f. Candidate-prior control for the forced choice (`ack_discrim --mode nothing`)
+Same forced choice with neither conversation nor reply shown: the pick rate
+that the candidate list alone produces for each reply set's item / turn mix.
+Evidence carried by a reply = reply-alone rate minus this prior.
+`data/expT{,U}_discrim_nothing.txt`.
+
+| reply set | original: prior -> reply alone | held-out: prior -> reply alone |
+|---|---|---|
+| blocked, receiver knew (raw) | 43% -> 64% (**+21**) | 57% -> 67% (**+10**) |
+| delivered, receiver knew | 28% -> 28% (**0**) | 44% -> 48% (**+4**) |
+| delivered, receiver wrong | 29% -> 27% (-2) | 40% -> 38% (-2) |
+
+- The target is not a neutral 1-in-5: the candidate list alone favours it
+  (28-57% depending on the item mix), so raw rates must be read against this
+  prior. Against it, **delivered acknowledgments carry essentially no
+  word-level evidence on either item set (0 and +4 points), while the blocked
+  ones carry 10-21 points.**
+- This resolves the apparent held-out discrepancy in 11e (48% vs 38%): it was
+  a difference in item mix between knowing and wrong receivers, not evidence
+  in the replies.
