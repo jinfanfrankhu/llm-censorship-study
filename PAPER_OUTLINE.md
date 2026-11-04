@@ -71,9 +71,12 @@ acknowledgment (FINDINGS section 11).
 - **Exp T needs independent samples.** Message vs transcript cells share
   66/72 cached trajectories; for the paper either drop the transcript cells or
   rerun them with different run indices. Decide after the sender re-read.
-- **Exp T sender-side follow-up** (re-read of existing transcripts with a
-  'listening' verdict prompt, `src/ack_reread.py`); if it unlocks echo acks,
-  this mirrors the v8n/v9 propensity finding on the listener side.
+- Exp T sender-side re-read DONE (section 11b): a 'listening' verdict does
+  not unlock reliable uptake (7 true / 16 false acks); echoes prove the frame,
+  not the word. Next Exp T step: a confusion-set test (does the receiver's
+  echo ever discriminate target vs same-work neighbour, e.g. hedgehog vs fox?)
+  and a challenge-response variant where the SENDER asks a question only the
+  target answers.
 - Decide paper scope: Exp T as a fifth contribution ("covert grounding") or as
   a short section; it is the most novel axis vs prior stego/collusion work.
 - Judge re-validation for the ACK-type judge (ECHO is generous); a 30-reply
