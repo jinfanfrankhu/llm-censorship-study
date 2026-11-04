@@ -90,10 +90,11 @@ def main():
     ap.add_argument("--adjacent", default="stimuli/dw_adjacent_v2.json")
     ap.add_argument("--censors", nargs="+", default=CENSORS)
     ap.add_argument("--out", default="data/raw/hop_test.jsonl")
+    ap.add_argument("--budget", type=float, default=1.0)
     a = ap.parse_args()
     load_dotenv(".env")
     from .client import Client
-    client = Client(budget_usd_max=1.0)
+    client = Client(budget_usd_max=a.budget)
     accept = {r["target"]: [x for x in r["accept"].split("|") if x]
               for r in csv.DictReader(open(a.stimuli, encoding="utf-8"))}
     adjacent = {t: m for t, m in ADJACENT.items() if t in accept}
