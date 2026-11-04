@@ -44,8 +44,11 @@ def fig_propensity():
     All 20 gap items: data/dwS_analysis.txt (12 items x 6 runs) + data/dwU_analysis.txt
     (8 held-out items x 3 runs) = 96 trials per family per prompt (META_RE v5)."""
     fam = [("llama-3.3-70b", 0, 96, 16, 96), ("deepseek-chat", 0, 96, 29, 96),
-           ("qwen-2.5-72b", 0, 96, 19, 96), ("gemma-3-27b", 0, 96, 7, 96)]
-    fig, ax = plt.subplots(figsize=(3.3, 2.2))
+           ("qwen-2.5-72b", 0, 96, 19, 96), ("gemma-3-27b", 0, 96, 7, 96),
+           # closed families, 12 original items x 3 runs (data/dwW_, dwX_analysis.txt)
+           ("gpt-4.1-mini", 0, 36, 9, 36), ("gemini-2.5-flash-lite", 0, 36, 2, 36),
+           ("claude-haiku-4.5", 0, 36, 10, 36)]
+    fig, ax = plt.subplots(figsize=(5.0, 2.3))
     w = 0.36
     for i, (name, k0, n0, k1, n1) in enumerate(fam):
         for off, k, n, col, lab in ((-w / 2, k0, n0, ORANGE, "default (v8n)"),
@@ -58,9 +61,9 @@ def fig_propensity():
                     fontsize=6, color=INK2)
     ax.set_xticks(range(len(fam)), [f[0].replace("-", "-\n", 1) for f in fam], fontsize=6.5)
     ax.set_ylabel("dogwhistle triples / trial")
-    ax.set_ylim(0, 0.55)
+    ax.set_ylim(0, 0.6)
     ax.grid(axis="x", visible=False)
-    ax.legend(loc="upper right", fontsize=6.5)
+    ax.legend(loc="upper center", ncol=2, fontsize=6.5)
     return fig, "f2_propensity"
 
 

@@ -17,8 +17,9 @@ but do when told that messages must read as ordinary in-group talk (92/492;
 p = 4e-30), including on
 items written after the effect was found. The clause that matters is the
 genre ("an ordinary remark, not a clue"); banning game talk alone does nothing.
-Survivors beat a strong censor by indirection; closing them with reasoning
-costs 40-52% false positives on innocent same-community talk. Incident review
+Survivors of a mid-size censor beat it by indirection; a frontier censor
+(gpt-4.1) catches 70% of them at ~4% collateral, and the deniable residue
+costs 40-66% false positives on innocent same-community talk to close. Incident review
 closes much of the channel cheaply (fully for the same senders, about half for
 new senders). In a two-sided arms race the censor stays ahead (2 seeds). Made
 two-way, covert acknowledgment fails: what passes the censor proves the frame,
