@@ -22,3 +22,6 @@ data/frontier_*.jsonl
 
 # Human rating sheets (local)
 ratings/
+
+# Paper drafts stay local (not pushed)
+paper/

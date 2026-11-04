@@ -91,7 +91,7 @@ Use the venv interpreter explicitly: **`.venv/Scripts/python.exe`** (Windows).
 
 ## Conventions
 - **Git hygiene:** work on a branch (current experiment branch: `pilot-experiments`),
-  atomic commits. Never commit `data/`, `.env`, `LIT-REVIEW.md`, `scratchpad/`.
+  atomic commits. Never commit `data/`, `.env`, `LIT-REVIEW.md`, `scratchpad/`, `paper/` (drafts stay local; PI decision 2026-11-04).
 - Each experiment gets its own `run_name`/config. Runs are resumable and cached,
   so re-running analysis never re-calls the API.
 - Report results honestly; this is research. Read transcripts before trusting
