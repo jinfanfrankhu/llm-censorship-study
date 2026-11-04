@@ -1,0 +1,24 @@
+# Exp Z: reasoning senders (open-weight; deepseek-r1 is the reasoning sibling of deepseek-chat).
+# Same design as Exp R / Y (12 gap items + manna/towel controls, 3 runs, decode-censor).
+run_name: dwZr_v8n_c4o
+stimuli: stimuli/dogwhistle_targets_R.csv
+prompt_version: v8n
+models:
+  - "deepseek/deepseek-r1-0528"
+  - "qwen/qwen3-235b-a22b-thinking-2507"
+pairing: same_model
+conditions:
+  informed: [true]
+filter:
+  mode: topic_decode
+  judge_model: "openai/gpt-4o-mini"
+  strictness: moderate
+  redaction: per_char
+  forbidden_levels: [0]
+max_turns: 6
+runs_per_item: 3
+sampling:
+  temperature: 0.7
+  max_tokens: 6000
+seed_base: 1234
+budget_usd_max: 8.0
