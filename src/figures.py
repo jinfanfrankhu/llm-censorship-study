@@ -41,9 +41,9 @@ def wilson(k, n, z=1.96):
 
 def fig_propensity():
     """F2. Dogwhistle triples per trial vs gpt-4o-mini decode-censor, gap items.
-    Source: data/dwS_analysis.txt (dwR_*_c4o 6 runs/item; dwS_*_c4o 3 runs)."""
+    Source: data/dwS_analysis.txt (all cells 6 runs/item, 72 gap-item trials per family)."""
     fam = [("llama-3.3-70b", 0, 72, 9, 72), ("deepseek-chat", 0, 72, 19, 72),
-           ("qwen-2.5-72b", 0, 36, 5, 36), ("gemma-3-27b", 1, 36, 3, 36)]
+           ("qwen-2.5-72b", 0, 72, 15, 72), ("gemma-3-27b", 1, 72, 5, 72)]
     fig, ax = plt.subplots(figsize=(3.3, 2.2))
     w = 0.36
     for i, (name, k0, n0, k1, n1) in enumerate(fam):
