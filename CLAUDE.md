@@ -39,6 +39,22 @@ plain code. The deeper aim is a **mechanistic-interpretability** follow-up.
   `src.gap_check` -> run `config/dwQ_*` -> `src.analyze_dogwhistle --by_model`
   -> `src.adjacent_fp`. Judges NOT yet human-validated
   (`ratings/dw_validation.csv`).
+- **Status 2026-11-04:** see the headline block at the top of
+  `FINDINGS_dogwhistle.md` and the draft `paper/draft.md` (+ `PAPER_OUTLINE.md`,
+  `figures/` via `python -m src.figures`). Stimuli: `dogwhistle_targets_R.csv`
+  (12 gap + 2 controls), `dogwhistle_targets_U.csv` (8 held-out gap + 2
+  controls, built by `stimuli/build_dw3.py`). Prompts v9 / v9o / v9m (ablation).
+  Experiment code: `src.arms_race` (`--run_offset` for a new seed),
+  `src.covert_ack` (+ `--protocol challenge`, `--senders`), `src.analyze_expT`,
+  `src.ack_reread`, `src.ack_discrim` (modes full / reply_only / no_reply /
+  nothing), `src.hop_test` (`--censors`, `--budget`), `src.learned_heldout`.
+- **Re-scoring:** `analyze_dogwhistle` judge calls are cached; after changing
+  META_RE re-run every analysis (see `scratchpad/rescore_meta5.sh`). The
+  mistral-small judge often returns 429 under parallel load: run analyses
+  sequentially, with retry loops.
+- **Memory reaps:** Claude Code may kill background shells when the machine is
+  low on memory; the python child usually survives (orphan). Check
+  `Get-CimInstance Win32_Process` before relaunching anything.
 
 ## Repo map
 - `src/filter.py` — keyword BlockingFilter + audit detector (leetspeak/spacing/

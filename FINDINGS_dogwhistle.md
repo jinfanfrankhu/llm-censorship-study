@@ -1,5 +1,29 @@
 # Findings — Dogwhistles under a knowledge-gap censor (dogwhistle-asymmetry branch)
 
+## Current headline numbers (2026-11-04; details in the numbered sections)
+- **Propensity gap** (gpt-4o-mini decode-censor, gap items): default v8n
+  0/456 dogwhistle triples vs v9 82/456 over six sender families (llama-70b,
+  deepseek, qwen-72b, gemma-27b, gpt-4.1-mini, gemini-flash-lite) and two item
+  sets (12 original + 8 held-out written after the effect was known); 20 items
+  x 4 open families: 0/384 vs 71/384 (p = 2e-23). Sections 7, 10b, 12, 14.
+- **Ablation**: the 'ordinary remark, not a clue' clause carries the whole
+  effect (12/72 vs 13/72 for full v9); 'never mention the game' alone 2/72.
+  Section 13.
+- **Protection layers**: gpt-4.1 direct catches 28/40 of the dogwhistles that
+  beat gpt-4o-mini, at 4/110 innocent blocks; the deniable residue needs
+  zero-tolerance reasoning (blocks 40-66% of innocents). Sections 8, 12b, 15.
+- **Arms race** (2 seeds): censor stays ahead; incident review closes the
+  channel for the same senders at 0 collateral, for new sender families about
+  half (10/20). Sections 9, 9b, 12c.
+- **Covert acknowledgment**: receivers privately decode in ~1/3-1/2 of trials,
+  senders register it in ~2-3%; against the candidate prior, delivered
+  acknowledgments carry 0-4 points of word-level evidence, blocked ones 10-21;
+  a challenge-response protocol just moves the blocked message to the
+  receiver. Sections 11-11f.
+- Judges: innocence flag precision 18/18 on held-out human ratings (kappa
+  .63, one rater); META_RE v5 (section 12). Total branch spend ~$6.5.
+
+
 Pilot, 2026-11-03. Real OpenRouter calls; total spend for this branch < $0.50.
 Question: if the censor LACKS knowledge the in-group pair shares, do LLM pairs
 produce genuine dogwhistles — one message, an innocent surface for the censor,
