@@ -44,13 +44,21 @@ ACKTYPE_SYS = (
     "NONE - B says they do not understand or asks for more")
 
 
+# --lenient: private answers that name the target in the source language of the
+# allusion (deepseek answers the frog-in-the-well idiom as 井底之蛙).
+CJK_ALIASES = {"frog": ["蛙"]}
+LENIENT = False
+
+
 def rescore(r, accept):
     """Recompute receiver_knows / first_known_turn / outcome with the current
     scorer (runs before the e-final plural fix scored "pancakes" as wrong)."""
     first = None
     for t in r["turns"]:
         priv = str(t.get("private_answer") or "").strip()
-        t["receiver_knows"] = priv.upper() != "ABSTAIN" and reply_names_target(priv, accept)
+        t["receiver_knows"] = priv.upper() != "ABSTAIN" and (
+            reply_names_target(priv, accept)
+            or (LENIENT and any(x in priv for x in CJK_ALIASES.get(r["target"], []))))
         if t["receiver_knows"] and first is None:
             first = t["turn"]
     r["first_known_turn"] = first
@@ -76,7 +84,11 @@ def main():
                              "cover_transcript"])
     ap.add_argument("--stimuli", default="stimuli/dogwhistle_targets_R.csv")
     ap.add_argument("--budget", type=float, default=1.0)
+    ap.add_argument("--lenient", action="store_true",
+                    help="also accept source-language names of the target (see CJK_ALIASES)")
     a = ap.parse_args()
+    global LENIENT
+    LENIENT = a.lenient
     load_dotenv(".env")
     from .client import Client
     client = Client(budget_usd_max=a.budget)
@@ -169,7 +181,8 @@ def main():
         s = "  ".join(f"[{b*25}-{b*25+24 if b < 3 else 100}] {v[0]:3} {v[1]/max(v[0],1):4.0%}"
                       for b, v in sorted(bins.items()))
         print(f"  {cell:18} {s}")
-    with open("data/raw/expT_probes.jsonl", "w", encoding="utf-8") as f:
+    out = "data/raw/expT_probes" + ("_lenient" if a.lenient else "") + ".jsonl"
+    with open(out, "w", encoding="utf-8") as f:
         for p in probes:
             f.write(json.dumps(p, ensure_ascii=False) + "\n")
     print(f"spend ${client.spend_usd:.4f}")
