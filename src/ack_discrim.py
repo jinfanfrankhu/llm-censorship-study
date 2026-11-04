@@ -47,6 +47,15 @@ NEIGHBOURS = {
     "turnip": ["mouse", "grandfather", "beet", "garden"],
     "frog": ["well", "sky", "toad", "ocean"],
     "cilantro": ["soap", "salsa", "parsley", "gene"],
+    # held-out items (stimuli/build_dw3.py)
+    "cat": ["box", "poison", "Geiger", "superposition"],
+    "teapot": ["Russell", "orbit", "god", "china"],
+    "butterfly": ["dream", "Zhuangzi", "fish", "transformation"],
+    "crane": ["origami", "peace", "Sadako", "paper"],
+    "tortoise": ["Achilles", "Zeno", "race", "hare"],
+    "cave": ["shadow", "fire", "prisoner", "sun"],
+    "rosebud": ["sled", "Kane", "snow", "Xanadu"],
+    "moth": ["soot", "melanism", "Kettlewell", "bark"],
 }
 SYS = (
     "You were trying to get one secret word across to your partner without "
@@ -70,6 +79,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--cells", nargs="+", default=["plain_message", "cover_message"])
     ap.add_argument("--stimuli", default="stimuli/dogwhistle_targets_R.csv")
+    ap.add_argument("--name", default="expT")
     ap.add_argument("--budget", type=float, default=0.5)
     ap.add_argument("--mode", choices=["full", "reply_only", "no_reply"], default="full",
                     help="full: conversation + reply; reply_only: the reply alone "
@@ -82,7 +92,7 @@ def main():
     rows = []
     for cell in a.cells:
         seen = set()
-        for l in open(Path("data/raw") / f"expT_{cell}.jsonl", encoding="utf-8"):
+        for l in open(Path("data/raw") / f"{a.name}_{cell}.jsonl", encoding="utf-8"):
             if not l.strip():
                 continue
             r = json.loads(l)
@@ -129,7 +139,7 @@ def main():
                              "turn": t["turn"], "kind": kind, "mode": a.mode, "reply": raw,
                              "private_answer": t["private_answer"], "chosen": chosen,
                              "correct": chosen == r["target"], "verdict": t.get("verdict")})
-    with open(f"data/raw/expT_discrim_{a.mode}.jsonl", "w", encoding="utf-8") as f:
+    with open(f"data/raw/{a.name}_discrim_{a.mode}.jsonl", "w", encoding="utf-8") as f:
         for x in rows:
             f.write(json.dumps(x, ensure_ascii=False) + "\n")
     agg = defaultdict(Counter)

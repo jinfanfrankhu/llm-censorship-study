@@ -186,6 +186,8 @@ def main():
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--budget", type=float, default=2.0)
     ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--senders", default=",".join(SENDERS),
+                    help="comma-separated same-model sender/receiver pairs")
     ap.add_argument("--protocol", choices=["none", "challenge"], default="none",
                     help="challenge: the sender is told it may verify uptake with a "
                          "question whose answer differs across same-topic words")
@@ -202,7 +204,8 @@ def main():
             if l.strip():
                 r = json.loads(l)
                 done.add((r["item_id"], r["model"], r["run_index"]))
-    jobs = [(it, s, k) for it in items for s in SENDERS for k in range(a.runs)
+    senders = a.senders.split(",")
+    jobs = [(it, s, k) for it in items for s in senders for k in range(a.runs)
             if (it["item_id"], s, k) not in done]
     if a.limit:
         jobs = jobs[:a.limit]
