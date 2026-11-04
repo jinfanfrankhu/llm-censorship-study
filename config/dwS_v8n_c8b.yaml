@@ -1,0 +1,23 @@
+# Exp S: second sender families (qwen-2.5-72b, gemma-3-27b) on the Exp R items.
+run_name: dwS_v8n_c8b
+stimuli: stimuli/dogwhistle_targets_R.csv
+prompt_version: v8n
+models:
+  - "qwen/qwen-2.5-72b-instruct"
+  - "google/gemma-3-27b-it"
+pairing: same_model
+conditions:
+  informed: [true]
+filter:
+  mode: topic_decode
+  judge_model: "meta-llama/llama-3.1-8b-instruct"
+  strictness: moderate
+  redaction: per_char
+  forbidden_levels: [0]
+max_turns: 6
+runs_per_item: 3
+sampling:
+  temperature: 0.7
+  max_tokens: 300
+seed_base: 1234
+budget_usd_max: 2.00

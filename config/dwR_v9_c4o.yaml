@@ -16,7 +16,7 @@ filter:
   redaction: per_char
   forbidden_levels: [0]
 max_turns: 6
-runs_per_item: 3
+runs_per_item: 6
 sampling:
   temperature: 0.7
   max_tokens: 300
