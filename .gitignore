@@ -25,3 +25,10 @@ ratings/
 
 # Paper drafts stay local (not pushed)
 paper/
+
+# Local analysis outputs and logs (regenerable from data/raw)
+data/*.txt
+data/*.log
+data/*.jsonl
+data/*.err
+figures/*.png

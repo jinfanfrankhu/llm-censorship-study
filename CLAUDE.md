@@ -73,7 +73,7 @@ gpt-4.1; `T` = conversation-level censor).
 | P, Q | 5-item pilot; plain vs decode censor | `dwP_*`, `dwQ_*` | `data/dwP_analysis*.txt`, `data/dwQ*_analysis.txt` | 2-5 |
 | R | 12 gap items, censor ladder, v8n vs v9 | `dwR_*` | `data/dwR_analysis_meta5.txt` | 7 |
 | hop test | re-judge dogwhistles with CoT / stronger censors + collateral | `src.hop_test` | `data/hop_U.txt`, `data/hop_R_gpt41.txt`, `data/hop_U_gpt41.txt` | 8, 12b, 15 |
-| arms race | censor / sender / both learn, 4 rounds, 2 seeds | `src.arms_race` (`run_arms.sh`, `run_arB.sh`) | `data/arA_analysis.txt`, `data/arB_analysis.txt` | 9, 9b |
+| arms race | censor / sender / both learn, 4 rounds, 2 seeds | `src.arms_race` (`scripts/run_arms.sh`, `scripts/run_arB.sh`) | `data/arA_analysis.txt`, `data/arB_analysis.txt` | 9, 9b |
 | S | qwen-72b, gemma-27b senders | `dwS_*` | `data/dwS_analysis.txt` | 10, 10b |
 | T | covert acknowledgment (receiver replies through censor) | `src.covert_ack --name expT`; `src.analyze_expT` | `data/expT_analysis.txt` | 11 |
 | T re-read | alternative sender verdict prompt | `src.ack_reread` | `data/expT_reread_listen.txt` | 11b |

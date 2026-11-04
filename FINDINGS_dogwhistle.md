@@ -411,7 +411,7 @@ Round 3 settles the open questions from the partial run:
   arm (where it does not); that arm measures sender adaptation under a
   belief that the censor adapts.
 
-### 9b. Second seed — `run_arB.sh` (`--run_offset 3`, fresh cache keys)
+### 9b. Second seed — `scripts/run_arB.sh` (`--run_offset 3`, fresh cache keys)
 Same design, run_index 3-5 (independent samples, including round 0).
 `data/arB_analysis.txt`, F4 overlays both seeds.
 
@@ -473,7 +473,7 @@ cells (llama-70b, deepseek) were extended from 3 to 6 runs/item. Gap items only
   counts are low by at most 2; v8n is unaffected.
 
 ### 10b. Exp S at 6 runs/item vs gpt-4o-mini (balanced design)
-The two gpt-4o-mini Exp S cells were extended to 6 runs/item (`run_S6.sh`), so
+The two gpt-4o-mini Exp S cells were extended to 6 runs/item (`scripts/run_S6.sh`), so
 every family now has 72 gap-item trials per prompt against the same censor.
 `data/dwS_analysis.txt`.
 
