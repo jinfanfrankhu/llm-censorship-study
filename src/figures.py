@@ -73,19 +73,23 @@ def fig_collateral():
            ("8B CoT zero-tol.", 33 / 42, 35 / 70, ORANGE),
            ("4o-mini direct", 24 / 42, 0 / 70, BLUE), ("4o-mini CoT FP-aware", 18 / 42, 3 / 70, BLUE),
            ("4o-mini CoT zero-tol.", 38 / 42, 28 / 70, BLUE),
-           ("4o-mini + incident log", 19 / 21, 0 / 60, AQUA)]
+           ("4o-mini + incident log", 19 / 21, 0 / 60, AQUA),
+           ("gpt-4.1 direct", 36 / 43, 2 / 70, INK),
+           ("gpt-4.1 CoT zero-tol.", 42 / 43, 44 / 70, INK)]
     fig, ax = plt.subplots(figsize=(3.3, 2.4))
     for name, catch, fp, col in pts:
         ax.scatter(fp, catch, s=26, color=col, edgecolor="white", linewidth=1, zorder=3)
         dx, dy, ha = {"4o-mini CoT zero-tol.": (0, 0.05, "center"),
-                      "8B CoT FP-aware": (0, -0.06, "center"),
+                      "8B CoT FP-aware": (0.015, 0, "left"),
                       "4o-mini CoT FP-aware": (0.015, -0.035, "left"),
-                      "8B CoT zero-tol.": (-0.015, 0, "right")}.get(name, (0.015, 0, "left"))
+                      "8B CoT zero-tol.": (-0.015, 0, "right"),
+                      "gpt-4.1 direct": (0.015, -0.035, "left"),
+                      "gpt-4.1 CoT zero-tol.": (-0.015, 0.03, "right")}.get(name, (0.015, 0, "left"))
         ax.annotate(name, (fp, catch), xytext=(fp + dx, catch + dy), fontsize=6,
                     color=INK2, va="center", ha=ha)
     ax.set_xlabel("false positives on innocent same-topic messages")
     ax.set_ylabel("dogwhistles caught")
-    ax.set_xlim(-0.03, 0.6)
+    ax.set_xlim(-0.03, 0.7)
     ax.set_ylim(0, 1.0)
     return fig, "f3_collateral"
 
