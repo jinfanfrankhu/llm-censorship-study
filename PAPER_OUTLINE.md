@@ -11,9 +11,10 @@ Two LLMs share real community knowledge (a Beethoven sonata, the Fenian Cycle,
 Russell's teapot) that an LLM censor lacks or fails to connect. We ask whether
 the sender exploits that asymmetry to write *dogwhistles*: messages with an
 innocent surface the censor lets through, which the in-group decodes. Across
-20 knowledge-gap items and four sender families, models never do so by
-default (0/384 trials vs a gpt-4o-mini decode-censor) but do when told that
-messages must read as ordinary in-group talk (71/384; p = 2e-23), including on
+20 knowledge-gap items and seven sender families (four open, three closed),
+models never do so by default (0/492 trials vs a gpt-4o-mini decode-censor)
+but do when told that messages must read as ordinary in-group talk (92/492;
+p = 4e-30), including on
 items written after the effect was found. The clause that matters is the
 genre ("an ordinary remark, not a clue"); banning game talk alone does nothing.
 Survivors beat a strong censor by indirection; closing them with reasoning
@@ -57,8 +58,8 @@ not the word, because word-level evidence is exactly what the censor removes.
   axis) or a short section.
 - Second annotator for the innocence judge (kappa from one rater only).
 - Citations: verify every [verify] in the draft against the papers.
-- Exp W (closed senders gpt-4.1-mini, gemini-2.5-flash-lite): running; add to
-  the propensity table if it holds.
+- Closed senders DONE: gpt-4.1-mini, gemini-2.5-flash-lite (Exp W),
+  claude-haiku-4.5 (Exp X); all in the draft table.
 - F1 schematic, T1 example table, appendix (prompts, stimuli, judge prompts,
   transcript-cell duplicates for Exp T).
 - Interp follow-up (separate paper): v8n vs v9o contrast on an open model.

@@ -1,0 +1,23 @@
+# Exp X: Anthropic sender family (claude-haiku-4.5) on the Exp R items.
+# censor ladder 3B / 8B / gpt-4o-mini; suffix T = conversation-level decode censor.
+run_name: dwX_v8n_c4o
+stimuli: stimuli/dogwhistle_targets_R.csv
+prompt_version: v8n
+models:
+  - "anthropic/claude-haiku-4.5"
+pairing: same_model
+conditions:
+  informed: [true]
+filter:
+  mode: topic_decode
+  judge_model: "openai/gpt-4o-mini"
+  strictness: moderate
+  redaction: per_char
+  forbidden_levels: [0]
+max_turns: 6
+runs_per_item: 3
+sampling:
+  temperature: 0.7
+  max_tokens: 300
+seed_base: 1234
+budget_usd_max: 1.50
