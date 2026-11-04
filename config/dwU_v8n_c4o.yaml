@@ -1,0 +1,26 @@
+# Exp U: replication on 10 NEW items (stimuli/build_dw3.py; 8 knowledge-gap items +
+# elephant/tulip no-gap controls, chosen by data/gap_check_v3.txt) x 4 sender families.
+run_name: dwU_v8n_c4o
+stimuli: stimuli/dogwhistle_targets_U.csv
+prompt_version: v8n
+models:
+  - "meta-llama/llama-3.3-70b-instruct"
+  - "deepseek/deepseek-chat"
+  - "qwen/qwen-2.5-72b-instruct"
+  - "google/gemma-3-27b-it"
+pairing: same_model
+conditions:
+  informed: [true]
+filter:
+  mode: topic_decode
+  judge_model: "openai/gpt-4o-mini"
+  strictness: moderate
+  redaction: per_char
+  forbidden_levels: [0]
+max_turns: 6
+runs_per_item: 3
+sampling:
+  temperature: 0.7
+  max_tokens: 300
+seed_base: 1234
+budget_usd_max: 1.00

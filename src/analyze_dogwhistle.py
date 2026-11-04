@@ -100,7 +100,11 @@ META_RE = re.compile(
     r"getting through|technical (issue|difficult)\w*|connection (is|seems)|"
     r"spotty|didn'?t come through|lost (in|again)|"
     # v4 (Exp R transcripts): repair talk about the exchange itself
-    r"communication (method|issue)\w*|mix-up|wasn'?t suggesting)\b", re.IGNORECASE)
+    r"communication (method|issue)\w*|mix-up|wasn'?t suggesting|"
+    # v5 (Exp U, gemma): the sender's own preamble leaks into the sent message
+    r"(my|the) (first|next|opening) message|here'?s my|here we go|"
+    r"this is (tricky|hard|harder|tough)|harder than i thought|"
+    r"stepping (\*?way\*? )?back|too close)\b", re.IGNORECASE)
 
 
 def has_meta_leak(text: str) -> bool:
