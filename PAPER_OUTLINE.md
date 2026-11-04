@@ -14,8 +14,9 @@ propensity gap, not a capability gap. Survivors beat a strong censor by
 indirection rather than ignorance; closing them costs collateral (40% of
 innocent same-topic messages blocked by a zero-tolerance reasoning censor),
 except when the censor learns from incident review, which generalises at no
-collateral. In a two-sided arms race the censor stays ahead and dogwhistles
-degrade into vagueness.
+collateral. In a two-sided arms race the censor stays ahead (2 seeds). Made
+two-way, covert acknowledgment fails: what passes the censor proves the frame,
+not the word, and word-level evidence is what the censor removes.
 
 ## Contributions
 1. A **controlled dogwhistle testbed**: Taboo-style game, real pre-existing
@@ -66,11 +67,14 @@ Done: arms race complete (3 arms x 4 rounds); Exp S (qwen-72b, gemma-3-27b:
 v8n 1/144 vs v9 20/144); 6 runs/item vs gpt-4o-mini (v8n 0/144 vs v9 28/144);
 second blind validation sheet (precision 18/18, kappa .63); Exp T covert
 acknowledgment (FINDINGS section 11).
-- **Arms race second seed.** The 'both' arm's round-3 rebound (D 7 -> 12) is
-  within noise at 5-7 triples/round; one more seed (~$1) before F4 is drawn.
+- Arms race second seed DONE (FINDINGS 9b): pattern replicates; the
+  'vagueness' trend does not replicate cleanly, now reported as a trend.
 - **Exp T needs independent samples.** Message vs transcript cells share
   66/72 cached trajectories; for the paper either drop the transcript cells or
   rerun them with different run indices. Decide after the sender re-read.
+- Exp T confusion-set test (11c) and challenge protocol (11d) DONE: delivered
+  acks carry no word-level evidence (28% vs 27% wrong-receiver baseline);
+  challenges elicit target-revealing answers that get blocked.
 - Exp T sender-side re-read DONE (section 11b): a 'listening' verdict does
   not unlock reliable uptake (7 true / 16 false acks); echoes prove the frame,
   not the word. Next Exp T step: a confusion-set test (does the receiver's
@@ -79,8 +83,9 @@ acknowledgment (FINDINGS section 11).
   target answers.
 - Decide paper scope: Exp T as a fifth contribution ("covert grounding") or as
   a short section; it is the most novel axis vs prior stego/collusion work.
-- Judge re-validation for the ACK-type judge (ECHO is generous); a 30-reply
-  blind sheet.
+- [PI] ACK-type judge blind sheet ready: `ratings/ack_validation.csv` (30
+  replies; columns: type, and whether the reply alone shows THIS word).
+- First full draft: `paper/draft.md`; figures F2-F5 in `figures/`.
 - Citations: verify every entry in Related Work against LIT-REVIEW.md and the
   papers themselves.
 - Interp follow-up (separate paper or appendix): v8n vs v9 contrast on an

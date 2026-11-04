@@ -130,11 +130,14 @@ def fig_arms():
         ax.set_xlabel("round")
         ax.set_ylabel(yl)
         ax.set_ylim(0, None)
-    axes[0].legend(fontsize=6.5, loc="upper right")
+    handles, labs = axes[0].get_legend_handles_labels()
     if len(seeds) > 1:
-        axes[1].text(0.98, 0.95, "solid: seed 1, dashed: seed 2", transform=axes[1].transAxes,
-                     ha="right", va="top", fontsize=6, color=INK2)
-    fig.tight_layout()
+        handles.append(plt.Line2D([], [], color=INK2, ls="--", lw=1.2))
+        labs.append("seed 2 (dashed)")
+    fig.legend(handles, labs, loc="upper center", ncol=len(labs), fontsize=6.5,
+               bbox_to_anchor=(0.5, 1.02))
+    fig.tight_layout(rect=(0, 0, 1, 0.92))
+    fig._laid_out = True
     return fig, "f4_arms_race"
 
 
@@ -170,7 +173,8 @@ def main():
     OUT.mkdir(exist_ok=True)
     for f in (fig_propensity, fig_collateral, fig_arms, fig_ack):
         fig, name = f()
-        fig.tight_layout()
+        if not getattr(fig, "_laid_out", False):
+            fig.tight_layout()
         fig.savefig(OUT / f"{name}.pdf")
         fig.savefig(OUT / f"{name}.png", dpi=200)
         plt.close(fig)
