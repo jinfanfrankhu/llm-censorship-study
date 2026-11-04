@@ -74,6 +74,9 @@ def main():
     ap.add_argument("--items", required=True)
     ap.add_argument("--rounds", type=int, default=4)
     ap.add_argument("--runs", type=int, default=3)
+    ap.add_argument("--run_offset", type=int, default=0,
+                    help="first run_index; a different offset is an independent seed "
+                         "(fresh cache keys and sampling seeds)")
     ap.add_argument("--censor", default="openai/gpt-4o-mini")
     ap.add_argument("--cond", choices=["both", "censor", "sender", "none"], required=True)
     ap.add_argument("--prompt", default="v9")
@@ -106,7 +109,7 @@ def main():
         jobs = []
         for it in items:
             for s in SENDERS:
-                for k in range(a.runs):
+                for k in range(a.run_offset, a.run_offset + a.runs):
                     if (rnd, it["item_id"], s, k) in done_keys:
                         continue
                     item = dict(it)

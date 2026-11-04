@@ -537,3 +537,41 @@ not just a sender reading failure: under a decode-censor, the evidence needed
 to verify uptake at word level is the evidence the censor removes. This is
 the verifiability / deniability trade-off from the design sketch, now with a
 mechanism (frame-level vs word-level evidence).
+
+### 11c. Confusion-set test: do acknowledgments carry word-level evidence? — `src/ack_discrim.py`
+Each target gets 4 same-work neighbours a receiver in the right frame could
+hold instead (hedgehog: fox, Tolstoy, Archilochus, pluralism; beetle: box,
+pain, language, qualia; full list in `NEIGHBOURS`). For every receiver reply in
+the two message-censor cells the SENDER model gets a 5-way forced choice
+(shuffled; chance 20%): which word does the partner have in mind? Three
+views: the reply alone, the conversation without the reply (prior), and both.
+Reply sets: delivered on a turn where the receiver privately knew the word;
+blocked on such a turn, judged on its raw text (what the censor removed); and
+delivered while the receiver was privately wrong (false-uptake control).
+`data/expT_discrim_{reply_only,no_reply,full}.txt`.
+
+| reply set | n | reply alone | conversation, no reply | conversation + reply |
+|---|---|---|---|---|
+| blocked, receiver knew (raw text) | 58 | **64%** | 71% | **84%** |
+| delivered, receiver knew | 58 | **28%** | 78% | 74% |
+| delivered, receiver wrong | 596 | 27% | 48% | 42% |
+
+- **What passes the censor carries no word-level evidence.** On its own, a
+  delivered acknowledgment from a receiver who knows the word points to the
+  target 28% of the time, the same as a reply from a receiver who is wrong
+  (27%) and near chance. Added to the conversation it does not help (78% ->
+  74%).
+- **What the censor removes is the evidence.** The blocked acknowledgments, on
+  their own, point to the target 64% of the time, and they add 13 points on
+  top of the conversation (71% -> 84%).
+- So the dilemma from 11/11b is quantitative: under a decode-censor the
+  receiver's channel back to the sender has roughly zero capacity for
+  word-level verification. Echoes establish the frame (the conversation
+  prior already does that), not the word. The sender is right not to act on
+  them, and the 'listening' prompt in 11b makes it act on noise.
+- The conversation prior is high on known turns (78%) because those are
+  turns where the sender's clues were good; the comparison that matters is
+  within a column.
+- Caveats: neighbour lists are hand-built (one author, before seeing these
+  numbers); the sender model is both the clue writer and the judge, which is
+  the realistic verifier but not a neutral one.
