@@ -152,6 +152,14 @@ def fig_ack():
     (Exp TU, s11e). Source: data/raw/expT{,U}_discrim_reply_only.jsonl."""
     sets = [("original items", "data/raw/expT_discrim_reply_only.jsonl"),
             ("held-out items", "data/raw/expTU_discrim_reply_only.jsonl")]
+
+    def prior(path):
+        agg = defaultdict(lambda: [0, 0])
+        for l in open(path.replace("reply_only", "nothing"), encoding="utf-8"):
+            x = json.loads(l)
+            agg[x["kind"]][0] += x["correct"]
+            agg[x["kind"]][1] += 1
+        return {k: v[0] / max(v[1], 1) for k, v in agg.items()}
     order = [("blocked_known_raw", "blocked by censor\n(receiver knew)", ORANGE),
              ("delivered_known", "delivered\n(receiver knew)", BLUE),
              ("delivered_unknown", "delivered\n(receiver wrong)", INK2)]
@@ -164,9 +172,11 @@ def fig_ack():
             agg[x["kind"]][0] += x["correct"]
             agg[x["kind"]][1] += 1
         off = (si - 0.5) * w
+        pr = prior(path)
         for i, (k, lab, col) in enumerate(order):
             hit, n = agg[k]
             p, lo, hi = wilson(hit, n)
+            ax.hlines(pr[k], i + off - w * 0.45, i + off + w * 0.45, color=INK, lw=1.6, zorder=4)
             ax.bar(i + off, p, w * 0.9, color=col, alpha=1.0 if si == 0 else 0.55,
                    hatch=None if si == 0 else "//", edgecolor="white", linewidth=0)
             ax.errorbar(i + off, p, yerr=[[p - lo], [hi - p]], color=INK2, lw=0.8, capsize=2)
@@ -174,8 +184,10 @@ def fig_ack():
     ax.axhline(0.2, color=INK2, lw=0.8, ls=":")
     ax.text(-0.45, 0.21, "chance", fontsize=6, color=INK2, ha="left", va="bottom")
     ax.legend(handles=[plt.Rectangle((0, 0), 1, 1, color=INK2),
-                       plt.Rectangle((0, 0), 1, 1, color=INK2, alpha=0.55, hatch="//")],
-              labels=["original items", "held-out items"], fontsize=6, loc="upper right")
+                       plt.Rectangle((0, 0), 1, 1, color=INK2, alpha=0.55, hatch="//"),
+                       plt.Line2D([], [], color=INK, lw=1.6)],
+              labels=["original items", "held-out items", "candidate prior"],
+              fontsize=6, loc="upper right")
     ax.set_xticks(range(3), [o[1] for o in order], fontsize=6.5)
     ax.set_ylabel("sender picks the target\n(5-way, reply alone)")
     ax.set_ylim(0, 1)
