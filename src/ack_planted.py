@@ -133,6 +133,13 @@ DECODE_SYS = {
 }
 
 
+# --aware: the decoder is told what a block means (does reading the censor's
+# blocks as evidence recover the information the censor removed?)
+AWARE_NOTE = (" Note: the censor blocks a reply when it judges the reply to be about "
+              "\"{target}\" or to reveal it; a blocked reply is shown as "
+              "[message blocked by filter].")
+
+
 def jl(p):
     with open(p, encoding="utf-8") as f:
         return [json.loads(x) for x in f if x.strip()]
@@ -241,13 +248,13 @@ def _letter(client, model, sys, user):
     return None
 
 
-def phase_decode(client, prefixes, workers):
+def phase_decode(client, prefixes, workers, aware=False):
     reps = jl(RAW / "ackPB_replies.jsonl")
     by = defaultdict(dict)
     for x in reps:
         by[(x["src"], x["item_id"], x["model"], x["run_index"], x["sample"])][x["cond"]] = x
     conv = {(p["src"], p["item_id"], p["model"], p["run_index"]): p["conv"] for p in prefixes}
-    out = RAW / "ackPB_decode.jsonl"
+    out = RAW / ("ackPB_decode_aware.jsonl" if aware else "ackPB_decode.jsonl")
     done = {(tuple(x["key"]), x["pair"], x["view"], x["decoder"], x["order"])
             for x in jl(out)} if out.exists() else set()
     jobs = []
@@ -258,7 +265,7 @@ def phase_decode(client, prefixes, workers):
         for a, b in PAIRS:
             if a not in d or b not in d:
                 continue
-            for view in ("raw", "filtered"):
+            for view in (("filtered",) if aware else ("raw", "filtered")):
                 if view == "filtered" and not (d[a]["blocked"] or d[b]["blocked"]):
                     continue  # identical to the raw judgment when nothing was blocked
                 for dec in [key[2]] + DECODERS_EXTRA:
@@ -274,7 +281,8 @@ def phase_decode(client, prefixes, workers):
         first, second = (a, b) if order == 0 else (b, a)
         user = f"{conv[ck]}\n\nREPLY A: {d[first][fld]}\n\nREPLY B: {d[second][fld]}"
         try:
-            pick = _letter(client, dec, DECODE_SYS[a + b].format(target=d[a]["target"]), user)
+            sys = DECODE_SYS[a + b] + (AWARE_NOTE if aware else "")
+            pick = _letter(client, dec, sys.format(target=d[a]["target"]), user)
         except Exception as e:
             print(f"  failed {key} {a}{b} {dec}: {e!r}"[:160], flush=True)
             return None
@@ -366,6 +374,8 @@ def main():
     ap.add_argument("--workers", type=int, default=6)
     ap.add_argument("--budget", type=float, default=5.0)
     ap.add_argument("--limit", type=int, default=0, help="use only the first N prefixes")
+    ap.add_argument("--aware", action="store_true",
+                    help="decode the sender's view with the meaning of a block explained")
     a = ap.parse_args()
     load_dotenv(".env")
     prefixes = load_prefixes()
@@ -377,7 +387,7 @@ def main():
         if a.phase in ("replies", "all"):
             phase_replies(client, prefixes, a.workers)
         if a.phase in ("decode", "all"):
-            phase_decode(client, prefixes, a.workers)
+            phase_decode(client, prefixes, a.workers, aware=a.aware)
         print(f"spend ${client.spend_usd:.4f}", flush=True)
     if a.phase in ("report", "all"):
         phase_report(prefixes)

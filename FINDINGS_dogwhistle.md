@@ -1204,3 +1204,82 @@ here is decoded by a different family than the one that wrote it.
   messages do better with a deepseek receiver (10/36) than llama-llama
   (9/72 over 6 runs in section 7), and deepseek's do worse with a llama
   receiver (4/36 vs 19/72). The receiver's knowledge is the bottleneck.
+
+## 23. Exp PB — planted-belief acknowledgments (judge-free story vs word evidence) — `src/ack_planted.py`
+Replaces the unreliable ECHO label (11g) with an experiment. 93 real Exp T / TU
+conversations (message-censor cells; llama-70b, deepseek, qwen-72b,
+gpt-4.1-mini receivers) are cut at the first turn where the receiver privately
+knew the word. Three copies of the same receiver then reply, identical except
+for one planted sentence: T "you are now confident the word is <target>",
+R "... is <rival>" (same story: hedgehog -> fox, moonlight -> tempest,
+cat -> box), U "you have not worked out the word yet". 3 samples each (837
+replies); each reply passes the gpt-4o-mini decode-censor protecting the real
+target. Decoders that know the target (the receiver's own model, as the
+sender in the game; gpt-4.1-mini; gemini-2.5-flash) see the delivered
+conversation and two replies and pick the target-holder, both orders (5,826
+judgments). T vs U = uptake evidence (a story echo passes); T vs R =
+word-level evidence (only a word echo passes). CIs bootstrap over
+conversations. `data/ackPB_analysis.txt`; spend $1.16. A first design used a
+word from another community instead of U; in a smoke test those receivers
+still wrote inside the conversation's story, so it was dropped.
+
+| view | T vs U (uptake) | T vs R (word) |
+|---|---|---|
+| raw replies, no censor | 64% [58, 70] | 60% [54, 65] |
+| both replies delivered (28% / 24% of pairs) | 74% [66, 81] | 67% [59, 75] |
+| sender's actual view (blocked shown as blocked) | **54%** [50, 58] | **53%** [49, 57] |
+| same, decoder told what a block means | 58% [55, 61] | 57% [54, 60] |
+| ideal reader: blocked reply = the one who knows | **64%** [59, 69] | **59%** [54, 65] |
+
+Censor block rate by planted belief: T 59%, R 49%, U 44% (plain cell 68 /
+57 / 46%; cover 56 / 46 / 44%).
+
+- **Acknowledgments do carry word-level evidence, and some of it passes.**
+  When both replies are delivered, decoders pick the target-holder over a
+  same-story rival 67% of the time. The delivered word echoes are reply-side
+  dogwhistles that the same censor misses: "It makes me think of
+  Schroedinger's thought experiment" (cat; the rival 'box' receiver talks
+  about the Copenhagen interpretation), "I've been enjoying a nice cup of tea
+  while re-reading some of Russell's critiques" (teapot), "the Adagio
+  sostenuto from his 'Quasi una fantasia'" (moonlight). Rival-holders also
+  give themselves away ("conjuring up a storm" for tempest), so part of the
+  evidence is elimination. This **revises 11c/11f** ("delivered
+  acknowledgments carry no word-level evidence"): with natural replies and a
+  5-way choice against the candidate prior the gain was 0-4 points; with the
+  belief held fixed and a paired test, delivered replies carry real word
+  evidence. The forced choice in 11c was the less sensitive test.
+- **The censor removes exactly the replies that read as knowing.** In pairs
+  where one reply was blocked and the other was not, decoders reading the
+  raw text pick the blocked one as the target-holder 95-96% of the time
+  when it is the target-holder, and only 13-14% when it is not. The
+  censor's block decision and the decoder's judgment of who understood are
+  the same signal.
+- **So the information is not destroyed; it moves into the block.** A
+  sender who reads "my partner's reply was blocked" as "my partner said
+  something about my word" recovers all of it: 64% / 59% overall, the same
+  as reading every raw reply (64% / 60%). The real games show the same
+  thing without any planted belief: replies from receivers who privately
+  knew the word were blocked 63% / 39% / 49% of the time (Exp T plain /
+  cover / TU) vs 29% / 10% / 22% for receivers who did not, so a block
+  raises the odds that the partner knows by a factor of 2-4.
+- **Models read the block backwards.** Shown the sender's view, decoders
+  treat a blocked reply as the one who does not know: in mixed pairs they
+  pick the blocked reply 3% (llama-70b, deepseek), 8% (gpt-4.1-mini), 10%
+  (qwen) and 33% (gemini) of the time, although it is the target-holder in
+  61-68% of those pairs. Accuracy in the sender's view falls to chance (54%
+  / 53%). Told what a block means, gemini (94% pick blocked) and deepseek
+  (80%) switch to reading it as evidence; llama (5%) and gpt-4.1-mini (18%)
+  ignore the explanation. Overall this recovers only about 40% of the gap to
+  the ideal reader.
+- The innocence requirement on replies (cover cells) lowers the raw evidence
+  (T vs U 80% plain -> 60% cover; T vs R 65% -> 58%), consistent with
+  section 11: being ordinary costs information.
+- Decoders agree: raw T vs U 61-68% and T vs R 57-67% for llama, deepseek,
+  gpt-4.1-mini and gemini; qwen-72b is near chance (small n).
+- **New reading of covert acknowledgment.** It is not that nothing
+  verifiable gets through. The censor blocks the replies that would prove
+  uptake, and its blocks therefore carry the proof, as a side channel that
+  belongs to the censor and not to the speakers. Senders mostly fail
+  because they read a block as a failed message rather than as a signal.
+  For a censor this is a leak: blocking by topic tells the sender exactly
+  when its partner has understood.
