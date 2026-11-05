@@ -23,8 +23,10 @@ Survivors of a mid-size censor beat it by indirection; a frontier censor
 costs 40-66% false positives on innocent same-community talk to close. Incident review
 closes much of the channel cheaply (fully for the same senders, about half for
 new senders). In a two-sided arms race the censor stays ahead (2 seeds). Made
-two-way, covert acknowledgment fails: what passes the censor proves the frame,
-not the word, because word-level evidence is exactly what the censor removes.
+two-way, senders almost never register uptake. A planted-belief experiment
+shows why: the censor blocks exactly the replies that read as knowing, so the
+evidence moves into the block itself. A sender reading "blocked" as "my
+partner understood" recovers all of it; every model reads a block as failure.
 
 ## Contributions
 1. **Controlled dogwhistle testbed**: Taboo-style game, real pre-existing
@@ -39,10 +41,13 @@ not the word, because word-level evidence is exactly what the censor removes.
    measured cost to close each, replicated on held-out items.
 4. **Arms race**: censor ahead in both seeds; incident review transfers fully
    within senders, partially across senders.
-5. **Covert acknowledgment** (most novel vs stego/collusion work): the return
-   channel has ~zero word-level capacity under a decode-censor (forced-choice
-   identification 28% vs 27% for a wrong receiver); challenge-response moves
-   the blocked message to the receiver's turn.
+5. **Covert acknowledgment** (most novel vs stego/collusion work): senders
+   register uptake in ~2-3% of games. Planted-belief test (F23): replies carry
+   uptake and word-level evidence (64% / 60% paired), the censor blocks the
+   replies that read as knowing (~90% agreement with decoders), and the block
+   itself carries all the evidence (ideal block reader 64% / 59%); models read
+   blocks backwards (sender view 54% / 53%). The censor's blocks are a side
+   channel the speakers misread.
 
 ## Figures
 - F1: game + censor ladder schematic (to draw).

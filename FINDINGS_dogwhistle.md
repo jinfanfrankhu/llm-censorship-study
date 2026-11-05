@@ -30,11 +30,12 @@
   channel for the same senders at 0 collateral, for new sender families about
   half (10/20). Sections 9, 9b, 12c.
 - **Covert acknowledgment**: receivers privately decode in ~1/3-1/2 of trials,
-  senders register it in ~2-3% (and ignored even the 5/30 replies a human
-  judged to carry word-level evidence); against the candidate prior, delivered
-  acknowledgments carry 0-4 points of word-level evidence, blocked ones 10-21;
-  a challenge-response protocol just moves the blocked message to the
-  receiver. Sections 11-11f.
+  senders register it in ~2-3%. Planted-belief test (judge-free, section 23):
+  replies carry uptake and word-level evidence (paired 64% / 60%; 74% / 67%
+  when both delivered), the censor blocks the replies that read as knowing,
+  and the block carries all the evidence (an ideal block reader gets 64% /
+  59%, the same as the raw text). Models read a block as "doesn't know"
+  (sender view 54% / 53%, chance). Revises 11c/11f. Sections 11-11g, 23.
 - Judges: innocence flag precision 18/18 on held-out human ratings (kappa
   .63, one rater); META_RE v5 (section 12). Two judges from other families
   confirm 185-188 of 189 triples (gemini-2.5-flash: kappa .63 vs the PI,

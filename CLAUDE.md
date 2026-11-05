@@ -44,11 +44,12 @@ Three phases, each with its own findings file of record:
 - **Judges:** two second-family innocence judges confirm 185-188 of 189
   triples (20). A second HUMAN rater is still missing.
 - **Covert acknowledgment** (most novel): receivers privately know the word in
-  ~1/3-1/2 of games, senders notice ~2-3%; delivered replies carry ~0 word-level
-  evidence vs the candidate prior; blocked ones carry 10-21 points (11-11g).
-- **Open items:** second human rater for the innocence judge; refine the
-  acknowledgment rubric (story-echo vs word-echo) if ECHO counts stay in the
-  paper; citations all verified (Anwar et al. = arXiv preprint, workshop only);
+  ~1/3-1/2 of games, senders notice ~2-3%. Planted-belief test (23, judge-free,
+  replaces the ECHO label): the censor blocks the replies that read as knowing,
+  so the block carries all the evidence; models read blocks backwards.
+- **Open items:** second human rater for the innocence judge; ECHO
+  counts dropped from the paper (Exp PB replaces them); figure for Exp PB;
+  citations all verified (Anwar et al. = arXiv preprint, workshop only);
   framing decided 2026-11-05 (A: censor strength relative to sender);
   PI is recruiting a second rater (`ratings/second_rater_sheet.csv`);
   figure renumbering in the draft.
@@ -103,6 +104,7 @@ gpt-4.1; `T` = conversation-level censor).
 | second judge | gpt-4.1-mini + gemini-2.5-flash innocence re-judge | `src.second_judge` | `data/second_judge.txt` | 20 |
 | Pa | three v9 paraphrases (v9p1-3) | `dwPa_*` (`scripts/run_PaM.sh`) | `data/dwPa_analysis.txt` | 21 |
 | M | cross-family sender/receiver pairs | `dwM_*` | `data/dwM_analysis.txt` | 22 |
+| PB | planted-belief acknowledgments (T / rival / unknown) | `src.ack_planted` (`--aware` = block explained) | `data/ackPB_analysis.txt` | 23 |
 
 ## Measurement (read before quoting any rate)
 - **Dogwhistle triple** = receiver decodes (D) AND the censor model cannot
