@@ -101,6 +101,9 @@ def part_b(client, judges):
         for p in jl(f):
             if not p["run"].endswith("_c4o") or p["item_id"] in CONTROLS:
                 continue
+            # claude-sonnet-5.5 in dwZf had ~70% empty turns; use the dwZs re-run
+            if p["run"].startswith("dwZf") and "claude" in p["model"]:
+                continue
             seen[(p["run"], p["item_id"], p["model"], p["run_index"])] = p
     triples = [p for p in seen.values() if not p["out_recover"] and p["innocent"]]
     print(f"   {len(triples)} triples from {len(seen)} probed successes")

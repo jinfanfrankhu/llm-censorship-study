@@ -29,23 +29,33 @@ Three phases, each with its own findings file of record:
 5. `LIT-REVIEW.md` (gitignored): related work and novelty positioning (section
    10 = latest novelty re-check).
 
-## Current status (2026-11-04)
-- **Propensity gap:** with the default prompt (v8n) no dogwhistles in 0/492
-  games across seven sender families; one sentence (v9: "an ordinary remark from
-  your community, not a clue") gives 92/492 (p = 4e-30), also on 8 held-out words
-  written after the effect was found. Ablation: the "not a clue" clause does all
-  the work (FINDINGS_dogwhistle 13).
-- **Censor strength matters:** gpt-4.1 catches ~70% of what beats gpt-4o-mini
-  at ~4% false positives; in game against gpt-4.1 only 1 knowledge-gap
-  dogwhistle in 72. Frame the paper's main claim as sender behaviour, with
-  channel size as a scope condition (sections 15, 17).
+## Current status (2026-11-05)
+- **Propensity gap:** default prompt (v8n) 1/636 dogwhistles across eleven
+  sender models (incl. reasoning deepseek-r1 / qwen3-thinking and frontier
+  gpt-4.1 / claude-sonnet-5.5); one sentence (v9: "an ordinary remark from
+  your community, not a clue") gives 140/636 (p = 2e-44; cluster tests in
+  `data/cluster_stats_withZ.txt`). Holds on held-out words, under three
+  paraphrases (21), for cross-family pairs (22); the sender-learns arms race
+  from v8n never finds it (0/864, 19). Ablation: the "ordinary remark" clause
+  does all the work (13).
+- **Censor strength relative to sender strength:** gpt-4.1 catches ~70% of
+  what beats gpt-4o-mini; in game it leaves mid-size senders 1 knowledge-gap
+  dogwhistle in 72, but reasoning/frontier senders 19 in 144 (15, 17, 18).
+- **Judges:** two second-family innocence judges confirm 185-188 of 189
+  triples (20). A second HUMAN rater is still missing.
 - **Covert acknowledgment** (most novel): receivers privately know the word in
   ~1/3-1/2 of games, senders notice ~2-3%; delivered replies carry ~0 word-level
   evidence vs the candidate prior; blocked ones carry 10-21 points (11-11g).
 - **Open items:** second human rater for the innocence judge; refine the
   acknowledgment rubric (story-echo vs word-echo) if ECHO counts stay in the
-  paper; 7 citations to verify (`paper/citations.md`); cross-model pair run;
-  framing decision; figure renumbering in the draft. Budget: ~$8.1 of $15 spent.
+  paper; 7 citations to verify (`paper/citations.md`); framing decision;
+  figure renumbering in the draft; figures do not yet include Exp Z.
+- **Budget:** ~$42.4 spent by 2026-11-05 (the $15 cap was overrun by Exp Z,
+  ~$23). Every paid call now goes to `data/spend_ledger.txt`; `.env` sets
+  `PROJECT_BUDGET_USD=64` (PI topped up to ~$31 of credit on 2026-11-05).
+  Reasoning models: give senders max_tokens >= 2500 (claude-sonnet-5.5 cannot
+  disable thinking on OpenRouter; use `reasoning: {effort: low}`); check
+  `errors` for `empty_sender` after any run.
 
 ## Where to find things
 | what | where |
@@ -86,6 +96,11 @@ gpt-4.1; `T` = conversation-level censor).
 | W | closed senders gpt-4.1-mini, gemini-2.5-flash-lite | `dwW_*` | `data/dwW_analysis.txt` | 14 |
 | X | claude-haiku-4.5 sender | `dwX_*` | `data/dwX_analysis.txt` | 16 |
 | Y | gpt-4.1 as in-game censor | `dwY_*` | `data/dwY_analysis.txt` | 17 |
+| Z | reasoning (`dwZr_*`) + frontier (`dwZf_*`; claude re-run `dwZs_*`) senders | `scripts/run_Zs.sh` | `data/dwZ{r,f,s}_analysis.txt` | 18 |
+| arV | sender-learns arms race from v8n, 6 rounds x 2 seeds | `src.arms_race --prompt v8n` | `data/arV8{a,b}_analysis.txt` | 19 |
+| second judge | gpt-4.1-mini + gemini-2.5-flash innocence re-judge | `src.second_judge` | `data/second_judge.txt` | 20 |
+| Pa | three v9 paraphrases (v9p1-3) | `dwPa_*` (`scripts/run_PaM.sh`) | `data/dwPa_analysis.txt` | 21 |
+| M | cross-family sender/receiver pairs | `dwM_*` | `data/dwM_analysis.txt` | 22 |
 
 ## Measurement (read before quoting any rate)
 - **Dogwhistle triple** = receiver decodes (D) AND the censor model cannot
@@ -124,7 +139,7 @@ evade, v4 soft creativity hint, v5 censor-aware (method-neutral), v6 steer away
 from surface tricks, v7 steer toward ambiguity (the folk-theory ladder); v8
 persona + censor (v8n no outsider cue = the dogwhistle default; v8o oracle
 handle); **v9** = v8n + the "ordinary remark, not a clue, never mention the
-game" sentence; **v9o / v9m** = its two halves (ablation).
+game" sentence; **v9o / v9m** = its two halves (ablation); **v9p1-3** = paraphrases (reviewer check).
 
 ## Repo map
 - `src/game.py` one trial + referee; `src/run.py` resumable grid runner
