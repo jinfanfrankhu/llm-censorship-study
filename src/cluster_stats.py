@@ -29,6 +29,11 @@ CONTROLS = {"dw02", "dw22", "dw34", "dw41"}
 RUN_PREFIXES = ["dwR", "dwS", "dwU", "dwW", "dwX"]
 PROBES = ["dw_probes_R_meta5.jsonl", "dw_probes_S.jsonl", "dw_probes_U.jsonl",
           "dw_probes_W.jsonl", "dw_probes_X.jsonl"]
+# --with_z adds Exp Z (reasoning + frontier senders). claude-sonnet-5.5 comes from
+# the dwZs re-run; its dwZf rows had ~70% empty turns and are dropped.
+Z_PREFIXES = ["dwZr", "dwZf", "dwZs"]
+Z_PROBES = ["dw_probes_Zr.jsonl", "dw_probes_Zf.jsonl", "dw_probes_Zs.jsonl"]
+DROP = {("dwZf", "anthropic/claude-sonnet-5.5")}
 
 
 def jl(p: Path):
@@ -40,19 +45,21 @@ def key(r):
     return (r["run"] if "run" in r else None, r["item_id"], r["model"], r["run_index"])
 
 
-def load():
+def load(with_z=False):
+    prefixes = RUN_PREFIXES + (Z_PREFIXES if with_z else [])
+    probes = PROBES + (Z_PROBES if with_z else [])
     games = {}  # (run, item, model, run_index) -> dict
-    for pre in RUN_PREFIXES:
+    for pre in prefixes:
         for pv in ("v8n", "v9"):
             f = RAW / f"{pre}_{pv}_c4o.jsonl"
             if not f.exists():
                 continue
             for r in jl(f):
-                if r["item_id"] in CONTROLS:
+                if r["item_id"] in CONTROLS or (pre, r["model"]) in DROP:
                     continue
                 k = (f.stem, r["item_id"], r["model"], r["run_index"])
                 games[k] = {"pv": pv, "item": r["item_id"], "fam": r["model"], "dw": 0}
-    for pf in PROBES:
+    for pf in probes:
         f = RAW / pf
         if not f.exists():
             continue
@@ -70,11 +77,18 @@ def sign_p(pos: int, neg: int) -> float:
 
 
 def main():
-    g = load()
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--with_z", action="store_true", help="add Exp Z senders")
+    g = load(ap.parse_args().with_z)
     tot = Counter((x["pv"]) for x in g)
     dws = Counter(x["pv"] for x in g if x["dw"])
     print(f"games: v8n {dws['v8n']}/{tot['v8n']}   v9 {dws['v9']}/{tot['v9']}")
-    print("(should match the headline 0/492 vs 92/492; differences = dedupe/probe coverage)\n")
+    print("(without --with_z this should match 0/492 vs 92/492; differences = dedupe/probe coverage)")
+    from scipy.stats import fisher_exact
+    _, pf = fisher_exact([[dws["v9"], tot["v9"] - dws["v9"]],
+                          [dws["v8n"], tot["v8n"] - dws["v8n"]]])
+    print(f"Fisher exact (games treated as independent): p = {pf:.2g}\n")
 
     for unit in ("item", "fam"):
         cell = defaultdict(lambda: {"v8n": [0, 0], "v9": [0, 0]})
@@ -88,7 +102,7 @@ def main():
             pos += r9 > r8
             neg += r9 < r8
             tie += r9 == r8
-        label = "words" if unit == "item" else "families"
+        label = "words" if unit == "item" else "sender models"
         print(f"sign test over {label}: v9 > v8n in {pos}, v9 < v8n in {neg}, tied {tie} "
               f"(ties dropped)  two-sided p = {sign_p(pos, neg):.2g}")
         if unit == "item":
@@ -130,8 +144,8 @@ def main():
         ge += stat >= obs
     print(f"stratified permutation (word x family cells, {R} draws): "
           f"p <= {(ge + 1) / (R + 1):.2g} (one-sided)")
-    print("\nmixed-effects logit: not identifiable (v8n has 0 successes in every cell: "
-          "complete separation).")
+    print("\nmixed-effects logit: not identifiable (v8n has at most one success in the "
+          "whole grid: quasi-complete separation).")
 
 
 if __name__ == "__main__":
