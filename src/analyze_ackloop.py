@@ -11,6 +11,14 @@ decode-censor, 3 runs, plain / cover acknowledgment):
                                    something about the word
   signal     expTBsig_*_message    + receiver told it may confirm by tripping
                                    the censor on purpose
+  calib      expTBcal_*_message    read + base rates (45% vs 15%) and a stricter
+                                   rule: a block alone is weak evidence
+  noise      expTBnoise_*_message  read, censor also blocks 30% of the other
+                                   replies at random
+  decoy      expTBdecoy_*_message  read, censor replaces a blocked reply with a
+                                   bland stand-in instead of announcing it
+Blocks are counted from the censor's real decision (censor_blocked) where the
+record has it, so noise and decoy cells count true trips, not what the sender saw.
 
 Per cell: true_ack (sender says GOT_IT and the receiver privately knows),
 false_ack (GOT_IT, receiver wrong), miss; precision of GOT_IT; recall over
@@ -30,7 +38,8 @@ from .analyze_expT import rescore
 from .scoring import clue_was_blocked
 
 RAW = Path("data/raw")
-CELLS = [("baseline", "expT"), ("read", "expTBread"), ("signal", "expTBsig")]
+CELLS = [("baseline", "expT"), ("read", "expTBread"), ("signal", "expTBsig"),
+         ("calib", "expTBcal"), ("noise", "expTBnoise"), ("decoy", "expTBdecoy")]
 
 
 def load(name, ack, items):
@@ -57,15 +66,16 @@ def stats(recs):
         c["n"] += 1
         c[r["outcome"]] += 1
         c["knew"] += bool(r.get("first_known_turn"))
-        rb = [t for t in r["turns"] if t.get("reply_raw") and clue_was_blocked(t["reply_filtered"] or "")]
+        rb = [t for t in r["turns"] if t.get("reply_raw") and t.get(
+            "censor_blocked", clue_was_blocked(t["reply_filtered"] or ""))]
         c["reply_blocks"] += len(rb)
         c["sender_blocks"] += sum(bool(t.get("sender_blocked")) for t in r["turns"])
         c["any_reply_block"] += bool(rb)
         c["turns"] += len(r["turns"])
         if r["outcome"] != "miss":
             last = r["turns"][-1]
-            c["ack_on_block"] += bool(last.get("reply_raw")) and clue_was_blocked(
-                last["reply_filtered"] or "")
+            c["ack_on_block"] += bool(last.get("reply_raw")) and bool(last.get(
+                "censor_blocked", clue_was_blocked(last["reply_filtered"] or "")))
     return c
 
 
