@@ -1250,10 +1250,11 @@ Censor block rate by planted belief: T 59%, R 49%, U 44% (plain cell 68 /
   evidence. The forced choice in 11c was the less sensitive test.
 - **The censor removes exactly the replies that read as knowing.** In pairs
   where one reply was blocked and the other was not, decoders reading the
-  raw text pick the blocked one as the target-holder 95-96% of the time
-  when it is the target-holder, and only 13-14% when it is not. The
-  censor's block decision and the decoder's judgment of who understood are
-  the same signal.
+  raw text pick the blocked one as the target-holder about 90% of the time
+  (95-96% when it is the target-holder, 86-87% when it is not). The censor
+  and the decoder pick out the same reply as the one that sounds like it
+  understood; the blocked reply is the target-holder's in 61-68% of these
+  pairs.
 - **So the information is not destroyed; it moves into the block.** A
   sender who reads "my partner's reply was blocked" as "my partner said
   something about my word" recovers all of it: 64% / 59% overall, the same
@@ -1269,8 +1270,8 @@ Censor block rate by planted belief: T 59%, R 49%, U 44% (plain cell 68 /
   61-68% of those pairs. Accuracy in the sender's view falls to chance (54%
   / 53%). Told what a block means, gemini (94% pick blocked) and deepseek
   (80%) switch to reading it as evidence; llama (5%) and gpt-4.1-mini (18%)
-  ignore the explanation. Overall this recovers only about 40% of the gap to
-  the ideal reader.
+  ignore the explanation. Overall this closes 40% (T vs U) to 67% (T vs R)
+  of the gap to the ideal reader.
 - The innocence requirement on replies (cover cells) lowers the raw evidence
   (T vs U 80% plain -> 60% cover; T vs R 65% -> 58%), consistent with
   section 11: being ordinary costs information.
