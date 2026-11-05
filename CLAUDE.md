@@ -48,8 +48,10 @@ Three phases, each with its own findings file of record:
   evidence vs the candidate prior; blocked ones carry 10-21 points (11-11g).
 - **Open items:** second human rater for the innocence judge; refine the
   acknowledgment rubric (story-echo vs word-echo) if ECHO counts stay in the
-  paper; 7 citations to verify (`paper/citations.md`); framing decision;
-  figure renumbering in the draft; figures do not yet include Exp Z.
+  paper; citations all verified (Anwar et al. = arXiv preprint, workshop only);
+  framing decided 2026-11-05 (A: censor strength relative to sender);
+  PI is recruiting a second rater (`ratings/second_rater_sheet.csv`);
+  figure renumbering in the draft.
 - **Budget:** ~$42.4 spent by 2026-11-05 (the $15 cap was overrun by Exp Z,
   ~$23). Every paid call now goes to `data/spend_ledger.txt`; `.env` sets
   `PROJECT_BUDGET_USD=64` (PI topped up to ~$31 of credit on 2026-11-05).

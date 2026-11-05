@@ -76,7 +76,7 @@ Where each is answered, and what is still open.
 | Games are not independent (shared words, senders) | sign tests over words (18-0) and models (11-0), word-cluster bootstrap, stratified permutation (`data/cluster_stats_withZ.txt`) | done |
 | The innocence judge is one LLM and one rater | two judges from other families confirm 185-188 of 189 triples; gemini matches the human kappa (F20) | second human rater still open |
 | Same-model pairs collude through model idiosyncrasy, not community knowledge | cross-model pairs llama <-> deepseek (F22); KG-DW requires a fresh receiver to decode cold | done: 0/72 vs 14/72 cross-family, same size as same-model (F22) |
-| Censor too weak | gpt-4.1 offline (F15) and in game (F17); stronger senders still get 19 KG-DW / 144 past gpt-4.1 (F18) | done; reframe as relative strength |
+| Censor too weak | gpt-4.1 offline (F15) and in game (F17); stronger senders still get 19 KG-DW / 144 past gpt-4.1 (F18) | done; PI chose framing A (2026-11-05): channel size depends on censor strength relative to sender strength |
 | v9 just makes senders vague and lucky | triples split into KG-DW (fresh in-group decodes cold) vs vague throughout; most v9 triples are KG-DW | done |
 | Models would learn this with experience | sender-learns arms race from v8n: 0/864 over 6 rounds x 2 seeds (F19) | done |
 | Receiver prompt primes allusions ("your partner may allude to...") | identical in v8n and v9, so it cannot explain the gap; it raises decode rates in both | state in Setup |
