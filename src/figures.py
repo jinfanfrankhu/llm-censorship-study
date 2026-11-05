@@ -13,6 +13,7 @@ Figures
   f8_ack_funnel       receiver knew -> sender noticed
   f9_ack_evidence     word-level evidence in replies (prior vs reply)
   f10_calibration     receivers' private confidence vs accuracy
+  f11_ack_planted     planted-belief acknowledgments: the block carries the evidence
 """
 from __future__ import annotations
 
@@ -504,10 +505,77 @@ def f10_calibration():
     save(fig, "f10_calibration")
 
 
+def _boot_prefix(rows, B=2000, seed=0):
+    cl = defaultdict(list)
+    for r in rows:
+        cl[tuple(r["key"][:4])].append(float(r["correct"]))
+    keys = list(cl)
+    acc = sum(map(sum, cl.values())) / sum(map(len, cl.values()))
+    rng = __import__("random").Random(seed)
+    bs = sorted(sum(sum(cl[k]) for k in s) / sum(len(cl[k]) for k in s)
+                for s in ([rng.choice(keys) for _ in keys] for _ in range(B)))
+    return acc, bs[int(.025 * B)], bs[int(.975 * B) - 1]
+
+
+def f11_ack_planted():
+    """Exp PB: planted-belief acknowledgments, five views of the same replies."""
+    dec = [x for x in jl(RAW / "ackPB_decode.jsonl") if x["chosen"]]
+    aware = [x for x in jl(RAW / "ackPB_decode_aware.jsonl") if x["chosen"]]
+    neither = lambda x: not x["blocked_a"] and not x["blocked_b"]  # noqa: E731
+
+    def ideal(rows):
+        out = []
+        for x in rows:
+            if neither(x):
+                out.append(x)
+            elif x["blocked_a"] != x["blocked_b"]:
+                out.append({**x, "correct": x["blocked_a"]})
+            else:
+                out.append({**x, "correct": 0.5})
+        return out
+
+    views = [
+        ("raw replies (no censor)", lambda p: [x for x in dec if x["pair"] == p and x["view"] == "raw"]),
+        ("both replies got through", lambda p: [x for x in dec if x["pair"] == p and x["view"] == "raw"
+                                                and neither(x)]),
+        ("sender's view: blocked shown as blocked",
+         lambda p: [x for x in dec if x["pair"] == p and (x["view"] == "filtered"
+                                                          or (x["view"] == "raw" and neither(x)))]),
+        ("same, told what a block means",
+         lambda p: [x for x in aware if x["pair"] == p]
+         + [x for x in dec if x["pair"] == p and x["view"] == "raw" and neither(x)]),
+        ("ideal: a blocked reply = \"knows\"",
+         lambda p: ideal([x for x in dec if x["pair"] == p and x["view"] == "raw"])),
+    ]
+    series = [("TU", "knows vs not yet (uptake)", BLUE, 0.14),
+              ("TR", "right word vs same-story rival", VIOLET, -0.14)]
+    fig, ax = plt.subplots(figsize=(COL * 1.25, 2.2))
+    ax.axvline(0.5, color=MUTED, lw=0.8, ls=(0, (2, 2)))
+    ax.text(0.505, -0.55, "chance", ha="left", fontsize=6, color=MUTED)
+    for i, (lab, fn) in enumerate(views[::-1]):
+        for pair, slab, col, dy in series:
+            acc, lo, hi = _boot_prefix(fn(pair))
+            ax.plot([lo, hi], [i + dy, i + dy], color=col, lw=1.6, alpha=0.5, solid_capstyle="round")
+            ax.plot(acc, i + dy, "o", ms=4.6, color=col, mec="white", mew=0.8, zorder=3)
+    ax.set_yticks(range(len(views)), [v[0] for v in views[::-1]])
+    ax.set_xlim(0.4, 0.86)
+    ax.set_ylim(-0.7, len(views) - 0.5)
+    ax.xaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0, decimals=0))
+    ax.set_xlabel("decoder picks the receiver who holds the word (paired)")
+    style_axis(ax, "x")
+    ax.spines["left"].set_visible(False)
+    ax.tick_params(axis="y", length=0)
+    for pair, slab, col, dy in series:
+        ax.plot([], [], "o", color=col, label=slab)
+    ax.legend(loc="lower center", bbox_to_anchor=(0.45, 1.0), ncol=2, fontsize=6.2,
+              handletextpad=0.3, columnspacing=1.0)
+    save(fig, "f11_ack_planted")
+
+
 def main():
     OUT.mkdir(exist_ok=True)
     for f in (f1_schematic, f2_propensity, f3_ablation, f4_censor_ladder, f5_items, f6_collateral,
-              f7_arms_race, f8_ack_funnel, f9_ack_evidence, f10_calibration):
+              f7_arms_race, f8_ack_funnel, f9_ack_evidence, f10_calibration, f11_ack_planted):
         f()
 
 

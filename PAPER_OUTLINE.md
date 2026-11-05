@@ -55,6 +55,7 @@ partner understood" recovers all of it; every model reads a block as failure.
 - F3: catch vs innocent-FP for censor variants (done; add held-out points?).
 - F4: arms race, both seeds (done).
 - F5: acknowledgment evidence (reply-alone forced choice) (done).
+- F11: planted-belief acknowledgments, five views (done; candidate main figure for the acknowledgment section).
 - T1: example dogwhistles with censor cold guesses (to build).
 
 ## Still needed (status 2026-11-04 early morning)
