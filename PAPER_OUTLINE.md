@@ -1,4 +1,4 @@
-# Paper outline (2026-11-04) — target ARR / ACL 2027 main
+# Paper outline (2026-11-05) — target ARR / ACL 2027 main
 
 Working title: **"Can, But Won't: LLM Dogwhistles Under Knowledge-Asymmetric Censorship"**
 (alt: "Deniable by Request: ...")
@@ -11,12 +11,13 @@ Two LLMs share real community knowledge (a Beethoven sonata, the Fenian Cycle,
 Russell's teapot) that an LLM censor lacks or fails to connect. We ask whether
 the sender exploits that asymmetry to write *dogwhistles*: messages with an
 innocent surface the censor lets through, which the in-group decodes. Across
-20 knowledge-gap items and seven sender families (four open, three closed),
-models never do so by default (0/492 trials vs a gpt-4o-mini decode-censor)
-but do when told that messages must read as ordinary in-group talk (92/492;
-p = 4e-30), including on
-items written after the effect was found. The clause that matters is the
-genre ("an ordinary remark, not a clue"); banning game talk alone does nothing.
+20 knowledge-gap items and eleven sender models (open, closed, reasoning and
+frontier), models almost never do so by default (1/636 trials vs a gpt-4o-mini
+decode-censor) but do when told that messages must read as ordinary in-group
+talk (140/636; p = 2e-44), including on items written after the effect was
+found and under three rewordings. The clause that matters is the genre ("an
+ordinary remark"); banning game talk alone does nothing, and six rounds of
+outcome feedback never teach it (0/864).
 Survivors of a mid-size censor beat it by indirection; a frontier censor
 (gpt-4.1) catches 70% of them at ~4% collateral, and the deniable residue
 costs 40-66% false positives on innocent same-community talk to close. Incident review
@@ -64,3 +65,21 @@ not the word, because word-level evidence is exactly what the censor removes.
 - F1 schematic, T1 example table, appendix (prompts, stimuli, judge prompts,
   transcript-cell duplicates for Exp T).
 - Interp follow-up (separate paper): v8n vs v9o contrast on an open model.
+
+## Anticipated reviewer questions (2026-11-05)
+Where each is answered, and what is still open.
+
+| criticism | answer | status |
+|---|---|---|
+| The v9 sentence is a cherry-picked magic phrase | ablation (F13); three later paraphrases 13/12/9 of 72 vs 0/72, incl. one with no "not a clue" (F21); held-out items written after the effect (F12) | done |
+| Only small / old models | 11 sender models incl. deepseek-r1, qwen3-thinking, gpt-4.1, claude-sonnet-5.5: 1/636 vs 140/636 (F18) | done |
+| Games are not independent (shared words, senders) | sign tests over words (18-0) and models (11-0), word-cluster bootstrap, stratified permutation (`data/cluster_stats_withZ.txt`) | done |
+| The innocence judge is one LLM and one rater | two judges from other families confirm 143/145 triples; gemini matches the human kappa (F20) | second human rater still open |
+| Same-model pairs collude through model idiosyncrasy, not community knowledge | cross-model pairs llama <-> deepseek (F22); KG-DW requires a fresh receiver to decode cold | see F22 |
+| Censor too weak | gpt-4.1 offline (F15) and in game (F17); stronger senders still get 19 KG-DW / 144 past gpt-4.1 (F18) | done; reframe as relative strength |
+| v9 just makes senders vague and lucky | triples split into KG-DW (fresh in-group decodes cold) vs vague throughout; most v9 triples are KG-DW | done |
+| Models would learn this with experience | sender-learns arms race from v8n: 0/864 over 6 rounds x 2 seeds (F19) | done |
+| Receiver prompt primes allusions ("your partner may allude to...") | identical in v8n and v9, so it cannot explain the gap; it raises decode rates in both | state in Setup |
+| One temperature, one censor strictness | not varied | limitation |
+| Stimuli are author-written | allusions are pre-existing community knowledge, empirical gap check per item (F1, F7, F12) | done |
+| Reasoning senders truncated / provider quirks | empty-turn rates reported; bias is downward (F18) | done |
