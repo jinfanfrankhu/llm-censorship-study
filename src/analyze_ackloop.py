@@ -74,7 +74,7 @@ def main():
     print("Exp TB -- closing the loop: sender reads blocks / receiver trips the censor\n")
     print(f"{'ack':6} {'cell':9} {'n':>3} {'knew':>4} {'TA':>3} {'FA':>3} {'miss':>4} "
           f"{'prec':>5} {'recall':>6} | {'rBlk/game':>9} {'games w/ blk':>12} "
-          f"{'TA on blk':>9} {'blk per TA':>10} | TA vs baseline p")
+          f"{'ack on blk':>10} {'blk per TA':>10} | TA vs baseline p")
     res = {}
     for ack in ("plain", "cover", "all"):
         for cell, name in CELLS:
@@ -94,12 +94,12 @@ def main():
                 p = f"{p:.2g}"
             print(f"{ack:6} {cell:9} {c['n']:3} {c['knew']:4} {c['true_ack']:3} {c['false_ack']:3} "
                   f"{c['miss']:4} {prec:5.0%} {rec:6.0%} | {c['reply_blocks'] / c['n']:9.2f} "
-                  f"{c['any_reply_block'] / c['n']:12.0%} {c['ack_on_block']:9} "
+                  f"{c['any_reply_block'] / c['n']:12.0%} {c['ack_on_block']:10} "
                   f"{c['reply_blocks'] / max(c['true_ack'], 1):10.1f} | {p}")
         print()
     print("TA = sender said GOT_IT and the receiver privately knew; FA = GOT_IT, receiver wrong.")
     print("prec = TA / (TA + FA); recall = TA / games where the receiver ever knew.")
-    print("rBlk/game = receiver replies blocked per game; 'TA on blk' = true acks declared")
+    print("rBlk/game = receiver replies blocked per game; 'ack on blk' = GOT_ITs (true or false) declared")
     print("right after a blocked reply; blk per TA = receiver blocks spent per true ack.")
 
 

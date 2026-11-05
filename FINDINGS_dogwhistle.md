@@ -35,7 +35,10 @@
   when both delivered), the censor blocks the replies that read as knowing,
   and the block carries all the evidence (an ideal block reader gets 64% /
   59%, the same as the raw text). Models read a block as "doesn't know"
-  (sender view 54% / 53%, chance). Revises 11c/11f. Sections 11-11g, 23.
+  (sender view 54% / 53%, chance). Revises 11c/11f. Told what a block
+  means, senders confirm 8-15x more often (2 -> 16-29 of 144) but with ~3
+  false confirmations per true one and 4-6 censor trips each. Sections
+  11-11g, 23, 24.
 - Judges: innocence flag precision 18/18 on held-out human ratings (kappa
   .63, one rater); META_RE v5 (section 12). Two judges from other families
   confirm 185-188 of 189 triples (gemini-2.5-flash: kappa .63 vs the PI,
