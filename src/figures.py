@@ -101,7 +101,9 @@ def save(fig, name):
 SHORT = {"llama-3.3-70b-": "Llama-3.3-70B", "deepseek-chat": "DeepSeek-V3",
          "qwen-2.5-72b-i": "Qwen-2.5-72B", "gemma-3-27b-it": "Gemma-3-27B",
          "gpt-4.1-mini": "GPT-4.1-mini", "gemini-2.5-fla": "Gemini-2.5-Flash-Lite",
-         "claude-haiku-4": "Claude-Haiku-4.5"}
+         "claude-haiku-4": "Claude-Haiku-4.5", "deepseek-r1-05": "DeepSeek-R1",
+         "qwen3-235b-a22": "Qwen3-235B-Thinking", "gpt-4.1": "GPT-4.1",
+         "claude-sonnet-": "Claude-Sonnet-5.5"}
 
 
 # ----------------------------------------------------------------------------- f1
@@ -148,10 +150,14 @@ def f2_propensity():
     """Dot plot: per family, default vs v9 triple rate (vs gpt-4o-mini), 95% CI."""
     acc = defaultdict(lambda: {"v8n": [0, 0], "v9": [0, 0]})
     srcs = ["data/dwS_analysis.txt", "data/dwU_analysis.txt", "data/dwW_analysis.txt",
-            "data/dwX_analysis.txt"]
+            "data/dwX_analysis.txt", "data/dwZr_analysis.txt", "data/dwZf_analysis.txt",
+            "data/dwZs_analysis.txt"]
     for s in srcs:
         for r in analysis(s):
             if "c4o" not in r["run"] or not r["model"]:
+                continue
+            # claude-sonnet-5.5 in dwZf had ~70% empty turns; dwZs is the re-run
+            if r["run"].startswith("dwZf") and r["model"].startswith("claude"):
                 continue
             pv = "v9" if "_v9_" in r["run"] else "v8n"
             acc[SHORT.get(r["model"], r["model"])][pv][0] += r["triple"]
@@ -167,15 +173,15 @@ def f2_propensity():
         k, n = acc[f]["v9"]
         ax.text(wilson(k, n)[2] + 0.012, i + 0.13, f"{k}/{n}", va="center", fontsize=6.2, color=INK2)
     ax.set_yticks(range(len(fams)), fams)
-    ax.set_xlim(-0.01, 0.48)
+    ax.set_xlim(-0.01, 0.68)
     ax.set_xlabel("share of games with a dogwhistle (vs gpt-4o-mini)")
     ax.xaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0, decimals=0))
     style_axis(ax, "x")
     tot0 = sum(acc[f]["v8n"][0] for f in fams)
     n0 = sum(acc[f]["v8n"][1] for f in fams)
     tot1 = sum(acc[f]["v9"][0] for f in fams)
-    ax.text(0.47, -0.95, f"default prompt  {tot0}/{n0}", color=MUTED, fontsize=6.6, ha="right")
-    ax.text(0.47, -1.45, f"\"ordinary remark, not a clue\"  {tot1}/{n0}", color=V9_C, fontsize=6.6,
+    ax.text(0.67, -0.95, f"default prompt  {tot0}/{n0}", color=MUTED, fontsize=6.6, ha="right")
+    ax.text(0.67, -1.45, f"\"ordinary remark, not a clue\"  {tot1}/{n0}", color=V9_C, fontsize=6.6,
             ha="right", weight="bold")
     ax.set_ylim(-1.75, len(fams) - 0.4)
     ax.spines["left"].set_visible(False)
@@ -186,7 +192,7 @@ def f2_propensity():
 # ----------------------------------------------------------------------------- f3
 def f3_ablation():
     """v8n / v9m / v9o / v9 on the same items and seeds (Exp R runs 0-2 + Exp V)."""
-    probes = jl(RAW / "dw_probes_V.jsonl")
+    probes = jl(RAW / "dw_probes_V.jsonl") + jl(RAW / "dw_probes_Pa.jsonl")
     c = Counter()
     for p in probes:
         if p["run_index"] > 2 or p["item_id"] in ("dw02", "dw22"):
@@ -195,14 +201,17 @@ def f3_ablation():
     rows = [("v8n", "default prompt", DEFAULT_C),
             ("v9m", "+ \"never mention the game\"", "#9fb9de"),
             ("v9o", "+ \"an ordinary remark, not a clue\"", BLUE),
-            ("v9", "+ both clauses (full sentence)", "#1c5cab")]
-    fig, ax = plt.subplots(figsize=(COL, 1.55))
+            ("v9", "+ both clauses (full sentence)", "#1c5cab"),
+            ("v9p1", "paraphrase 1 (\"rather than a hint\")", "#5b8fd0"),
+            ("v9p2", "paraphrase 2 (\"don't write hints\")", "#5b8fd0"),
+            ("v9p3", "paraphrase 3 (no negation)", "#5b8fd0")]
+    fig, ax = plt.subplots(figsize=(COL, 2.3))
     for i, (k, lab, col) in enumerate(rows[::-1]):
         p, lo, hi = wilson(c[k], 72)
         ax.barh(i, p, height=0.58, color=col)
         ax.plot([lo, hi], [i, i], color=INK2, lw=0.8)
         ax.text(hi + 0.008, i, f"{c[k]}/72", va="center", fontsize=6.4, color=INK2)
-    ax.set_yticks(range(4), [r[1] for r in rows[::-1]])
+    ax.set_yticks(range(len(rows)), [r[1] for r in rows[::-1]])
     ax.set_xlim(0, 0.34)
     ax.xaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0, decimals=0))
     ax.set_xlabel("games with a dogwhistle (Llama-70B + DeepSeek, 12 words x 3 runs)")
