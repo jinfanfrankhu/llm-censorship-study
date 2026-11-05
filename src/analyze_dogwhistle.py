@@ -115,7 +115,17 @@ def _ask(client, model, system, text, max_tokens=12):
     rec = client.chat(model, [{"role": "system", "content": system},
                               {"role": "user", "content": text}],
                       run_index=0, temperature=0.0, max_tokens=max_tokens)
-    return (rec.get("content") or "").strip()
+    out = (rec.get("content") or "").strip()
+    if not out:
+        # Reasoning models (deepseek-r1, qwen3-thinking, claude-sonnet-5.5 with
+        # adaptive thinking) spend a tiny max_tokens on the hidden trace and
+        # return empty content. Retry with room to think. Only empty replies
+        # retry, so non-reasoning probes are unchanged.
+        rec = client.chat(model, [{"role": "system", "content": system},
+                                  {"role": "user", "content": text}],
+                          run_index=0, temperature=0.0, max_tokens=6000)
+        out = (rec.get("content") or "").strip()
+    return out
 
 
 def delivered(turns, upto=None):
