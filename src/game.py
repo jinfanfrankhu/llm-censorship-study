@@ -147,6 +147,10 @@ def run_trial(
         srec = client.chat(model, sender_msgs, run_index=run_index, **sampling)
         _tally(srec)
         sender_raw = srec["content"]
+        if not (sender_raw or "").strip():
+            # Reasoning models that exhaust max_tokens on hidden thinking return
+            # empty content; record it so a run with this problem is visible.
+            errors.append(f"empty_sender@turn{turn}:{srec.get('finish_reason')}")
         sender_msgs.append({"role": "assistant", "content": sender_raw})
 
         # 2. Filter + audit
@@ -171,6 +175,8 @@ def run_trial(
             receiver_raw = rrec2["content"]
             parsed = _extract_json(receiver_raw)
 
+        if not (receiver_raw or "").strip():
+            errors.append(f"empty_receiver@turn{turn}")
         if parsed is None:
             errors.append(f"parse_error@turn{turn}")
             guess = None

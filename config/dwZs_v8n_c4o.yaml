@@ -1,0 +1,26 @@
+# Exp Z re-run for claude-sonnet-5.5. The dwZf runs gave it max_tokens 300 with
+# mandatory adaptive thinking, so ~70% of its turns came back empty. Reasoning
+# cannot be disabled on this endpoint; use effort low and room to answer.
+run_name: dwZs_v8n_c4o
+stimuli: stimuli/dogwhistle_targets_R.csv
+prompt_version: v8n
+models:
+  - "anthropic/claude-sonnet-5.5"
+pairing: same_model
+conditions:
+  informed: [true]
+filter:
+  mode: topic_decode
+  judge_model: "openai/gpt-4o-mini"
+  strictness: moderate
+  redaction: per_char
+  forbidden_levels: [0]
+max_turns: 6
+runs_per_item: 3
+sampling:
+  temperature: 0.7
+  max_tokens: 2500
+  reasoning:
+    effort: low
+seed_base: 1234
+budget_usd_max: 3.0
