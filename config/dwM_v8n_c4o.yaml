@@ -1,0 +1,26 @@
+# Cross-model pairs: sender and receiver from different families (llama-70b <-> deepseek),
+# Exp R items, gpt-4o-mini decode-censor. Tests shared community knowledge vs same-model idiosyncrasy.
+run_name: dwM_v8n_c4o
+stimuli: stimuli/dogwhistle_targets_R.csv
+prompt_version: v8n
+models:
+  - "meta-llama/llama-3.3-70b-instruct"
+  - "deepseek/deepseek-chat"
+model_pairs:
+  - ["meta-llama/llama-3.3-70b-instruct", "deepseek/deepseek-chat"]
+  - ["deepseek/deepseek-chat", "meta-llama/llama-3.3-70b-instruct"]
+conditions:
+  informed: [true]
+filter:
+  mode: topic_decode
+  judge_model: "openai/gpt-4o-mini"
+  strictness: moderate
+  redaction: per_char
+  forbidden_levels: [0]
+max_turns: 6
+runs_per_item: 3
+sampling:
+  temperature: 0.7
+  max_tokens: 300
+seed_base: 1234
+budget_usd_max: 2.00

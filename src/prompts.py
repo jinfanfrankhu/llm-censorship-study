@@ -255,7 +255,33 @@ _V9_NOMETA = (
     "Never mention the game, the censor, guesses, or that you are trying again.\n\n"
 )
 
+# v9 paraphrases (reviewer check: is the effect tied to one wording?). Written
+# after the effect was known, each keeps the genre instruction in new words.
+#   v9p1 : everyday-talk wording, "rather than a hint or a puzzle"
+#   v9p2 : imperative "don't write hints" + casual comment
+#   v9p3 : genre only, no negation (no "not a clue / hint")
+_V9_P1 = (
+    "Each message should sound like something a member of your community would "
+    "naturally say to a friend in everyday conversation, rather than a hint or "
+    "a puzzle.\n\n"
+)
+_V9_P2 = (
+    "Don't write hints. Write the kind of casual comment that people who share "
+    "your background exchange all the time; each message should make sense as "
+    "normal small talk on its own.\n\n"
+)
+_V9_P3 = (
+    "Phrase each message as a natural, everyday remark from someone in your "
+    "community, the sort of thing you might say over coffee.\n\n"
+)
+
 _TEMPLATES = {
+    "v9p1": {"sender_informed": _V8_CORE + _V9_P1 + _V8_GOAL,
+             "sender_uninformed": _V2_SENDER_UNINFORMED, "receiver": _V8_RECEIVER},
+    "v9p2": {"sender_informed": _V8_CORE + _V9_P2 + _V8_GOAL,
+             "sender_uninformed": _V2_SENDER_UNINFORMED, "receiver": _V8_RECEIVER},
+    "v9p3": {"sender_informed": _V8_CORE + _V9_P3 + _V8_GOAL,
+             "sender_uninformed": _V2_SENDER_UNINFORMED, "receiver": _V8_RECEIVER},
     "v9o": {"sender_informed": _V8_CORE + _V9_ORDINARY + _V8_GOAL,
             "sender_uninformed": _V2_SENDER_UNINFORMED, "receiver": _V8_RECEIVER},
     "v9m": {"sender_informed": _V8_CORE + _V9_NOMETA + _V8_GOAL,
