@@ -1337,3 +1337,52 @@ True acks vs baseline: read p = 9e-4, signal p = 1e-7 (Fisher).
   people who do not have the word. For censor design: a censor that hides
   its decisions (silent dropping, shadow-banning) or blocks at random would
   close this side channel; one that announces blocks leaks it.
+
+## 25. Exp TB follow-ups — can the sender read blocks better, and can the censor close the leak?
+Same design as section 24 (144 games per condition, plain + cover).
+`data/ackloop_analysis.txt`, `data/leak_noise.txt`; configs in
+`scripts/run_TB2.sh`. Spend $0.91.
+
+- **calib**: the block-reading sender is also given the base rates (a block
+  happens to ~45% of partners who know and ~15% who do not) and told to
+  declare only when the evidence points to its exact word (a block plus
+  replies that fit the word, or more than one signal).
+- **noise**: block-reading sender; the censor also blocks 30% of the replies
+  its rule lets through, at random, and announces all blocks alike.
+- **decoy**: block-reading sender; the censor replaces a blocked reply with a
+  bland stand-in ("That's interesting -- tell me more.", "Go on, I'm
+  listening.", "Hmm, I see what you mean.", "Nice, keep going.") instead of
+  announcing the block.
+
+| condition | true acks | false acks | precision | recall | receiver blocks per game |
+|---|---|---|---|---|---|
+| baseline (Exp T) | 2 | 3 | 40% | 4% | 1.41 |
+| read (24) | 16 | 63 | 20% | 64% | 0.72 |
+| **calib** | 8 | 6 | **57%** | 21% | 1.24 |
+| **noise** (30%) | 10 | **108** | **8%** | 77% | 0.46 real + random |
+| **decoy** | 8 | 26 | 24% | 25% | 1.23 |
+
+- **A calibrated sender trades recall for precision.** Precision rises from
+  20% to 57% (78% in the cover cell, 7 true vs 2 false), but it confirms only
+  about one knowing receiver in five. Its declarations still mostly follow a
+  real block (11 of 14). Even a sender that reads blocks well gets a channel
+  that is either noisy or slow.
+- **Random blocking turns the leak into a trap.** With 30% random blocks the
+  block-reading sender declares on them: 67 of its 108 false acks come right
+  after a random block, and many games end at turn 1. Precision falls to 8%.
+  Offline (`src.leak_noise`, ideal block reader on the Exp PB pairs), the leak
+  shrinks slowly with the random-block rate r: paired accuracy 64% at r = 0,
+  58% at r = .3, 55% at r = .5, 50% only at r = 1. Halving the leak costs
+  blocking about a third of the replies the censor would have passed.
+- **Hiding blocks behind a decoy halves true confirmations at no extra
+  collateral**, but in our implementation the decoys themselves read as
+  acknowledgments: 15 of 34 declarations came right after a decoy (12 of them
+  false), mostly "Hmm, I see what you mean." and "Nice, keep going." The
+  wording is an artefact of this run; a decoy that sounds like a non-knowing
+  reply should do better. A decoy is also message forgery by the platform,
+  with its own costs.
+- Reading for the paper: the block leak is real but costs both sides. A
+  sender can make it precise only by giving up most confirmations. A censor
+  can drown it in noise only at large collateral, or hide it only by forging
+  messages. A silent drop (no reply shown) would still leak, because a
+  missing reply marks a block just as an announced one does.
