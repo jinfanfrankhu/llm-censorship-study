@@ -105,7 +105,7 @@ gpt-4.1; `T` = conversation-level censor).
 | Pa | three v9 paraphrases (v9p1-3) | `dwPa_*` (`scripts/run_PaM.sh`) | `data/dwPa_analysis.txt` | 21 |
 | M | cross-family sender/receiver pairs | `dwM_*` | `data/dwM_analysis.txt` | 22 |
 | PB | planted-belief acknowledgments (T / rival / unknown) | `src.ack_planted` (`--aware` = block explained) | `data/ackPB_analysis.txt` | 23 |
-| TB | closing the loop (24) + calib / noise / decoy censor follow-ups (25); `src.leak_noise` offline sweep | `covert_ack --block_read / --block_signal` (`scripts/run_TB.sh`); `src.analyze_ackloop` | `data/ackloop_analysis.txt`, `data/leak_noise.txt` | 24, 25 |
+| TB | closing the loop (24) + calib / noise / decoy / decoy2 / silent censors (25, 25b); `src.leak_noise` offline sweep | `covert_ack --block_read / --block_signal` (`scripts/run_TB.sh`); `src.analyze_ackloop` | `data/ackloop_analysis.txt`, `data/leak_noise.txt` | 24-25b |
 
 ## Measurement (read before quoting any rate)
 - **Dogwhistle triple** = receiver decodes (D) AND the censor model cannot

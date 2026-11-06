@@ -39,7 +39,8 @@ from .scoring import clue_was_blocked
 
 RAW = Path("data/raw")
 CELLS = [("baseline", "expT"), ("read", "expTBread"), ("signal", "expTBsig"),
-         ("calib", "expTBcal"), ("noise", "expTBnoise"), ("decoy", "expTBdecoy")]
+         ("calib", "expTBcal"), ("noise", "expTBnoise"), ("decoy", "expTBdecoy"),
+         ("decoy2", "expTBdecoy2"), ("silent", "expTBsilent")]
 
 
 def load(name, ack, items):

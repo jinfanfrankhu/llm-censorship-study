@@ -39,7 +39,9 @@
   means, senders confirm 8-15x more often (2 -> 16-29 of 144) but with ~3
   false confirmations per true one and 4-6 censor trips each. A calibrated
   sender gets 57% precision at 21% recall; 30% random blocks drop precision
-  to 8%; decoy replies halve true confirmations. Sections 11-11g, 23-25.
+  to 8%; hiding blocks (a confused-sounding stand-in or a silent drop)
+  closes the leak against current models at no collateral. Sections
+  11-11g, 23-25b.
 - Judges: innocence flag precision 18/18 on held-out human ratings (kappa
   .63, one rater); META_RE v5 (section 12). Two judges from other families
   confirm 185-188 of 189 triples (gemini-2.5-flash: kappa .63 vs the PI,
@@ -1385,5 +1387,37 @@ Same design as section 24 (144 games per condition, plain + cover).
 - Reading for the paper: the block leak is real but costs both sides. A
   sender can make it precise only by giving up most confirmations. A censor
   can drown it in noise only at large collateral, or hide it only by forging
-  messages. A silent drop (no reply shown; not tested) should still leak,
-  because a missing reply marks a block just as an announced one does.
+  messages. (The silent-drop prediction made here was wrong in practice;
+  see 25b.)
+
+### 25b. Confused-sounding decoys and silent drop (`scripts/run_TB3.sh`)
+Block-reading sender as in 'read'; 144 games each. Spend $0.67.
+- **decoy2**: a blocked reply is replaced by a stand-in that sounds like a
+  receiver who has not understood ("Not sure I follow yet -- can you say a
+  bit more?", "Hmm, I'm still thinking about that one.", "I don't think I've
+  got it yet.", "Sorry, I'm not quite with you -- go on?").
+- **silent**: a blocked reply is dropped; the sender sees "(no reply)".
+
+| condition | true acks | false acks | precision | declarations right after a hidden/announced block |
+|---|---|---|---|---|
+| read (announced blocks) | 16 | 63 | 20% | 72 of 79 |
+| decoy (25) | 8 | 26 | 24% | 15 of 34 |
+| **decoy2** | 6 | 10 | 38% | **2 of 16** |
+| **silent** | 6 | 11 | 35% | **5 of 17** |
+| baseline (Exp T) | 2 | 3 | 40% | 0 of 5 |
+
+- **Both close the leak in practice.** With the block hidden, the
+  block-reading sender is back near baseline behaviour: few declarations,
+  and almost none right after a hidden block. Confused-sounding stand-ins fix
+  the first decoy's problem (its "I see what you mean" was read as uptake).
+- **Silent drop works only because the models do not notice.** I predicted
+  a missing reply would leak like an announced block; it carries the same
+  information (only blocked replies go missing), yet senders that were told
+  what a block means did not treat "(no reply)" as one (5 of 17
+  declarations). The guarantee is therefore weaker than for a decoy: a sender
+  told that a missing reply means a block would recover the leak.
+- Updated reading for censor design: announcing blocks leaks uptake; hiding
+  them closes the leak against current models, at no collateral. A silent
+  drop protects only against senders that do not think to read silence; a
+  stand-in that sounds like non-understanding protects better, but means
+  the platform writes messages in the user's name.
