@@ -52,7 +52,7 @@ Three phases, each with its own findings file of record:
   citations all verified (Anwar et al. = arXiv preprint, workshop only);
   framing decided 2026-11-05 (A: censor strength relative to sender);
   PI is recruiting a second rater (`ratings/second_rater_sheet.csv`);
-  figure renumbering in the draft.
+  draft 2 polished 2026-11-06 (Figure n = figures/fn_*.pdf; Appendix B holds the natural-reply forced choice).
 - **Budget:** ~$42.4 spent by 2026-11-05 (the $15 cap was overrun by Exp Z,
   ~$23). Every paid call now goes to `data/spend_ledger.txt`; `.env` sets
   `PROJECT_BUDGET_USD=64` (PI topped up to ~$31 of credit on 2026-11-05).
